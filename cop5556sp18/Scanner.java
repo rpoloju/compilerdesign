@@ -320,7 +320,8 @@ public class Scanner {
 
 
 	 private enum State {
-		 START, AFTER_TIMES, AFTER_LESS, AFTER_GREATER, AFTER_NOT, AFTER_COLON, AFTER_EQUAL, FOR_DIGITS, FOR_IDENTIFIERS, AFTER_DOT};  //TODO:  this is incomplete
+		 START, AFTER_TIMES, AFTER_LESS, AFTER_GREATER, AFTER_NOT, AFTER_COLON, AFTER_EQUAL, FOR_DIGITS, FOR_IDENTIFIERS, AFTER_DOT, AFTER_SLASH,
+		 AFTER_COMMENTSTART};  //TODO:  this is incomplete
 
 	 
 	 //TODO: Modify this to deal with the entire lexical specification
@@ -458,6 +459,12 @@ public class Scanner {
 							pos++;
 						}
 						break;
+						case '/': {
+							state = State.AFTER_SLASH;
+							pos++;
+						}
+						break;
+						
 						
 						
 						
@@ -565,8 +572,20 @@ public class Scanner {
 				}
 				break;
 				
+				case AFTER_SLASH: {
+					if (ch == '*') {
+						state = State.AFTER_COMMENTSTART;
+						pos++;
+					} else {
+						tokens.add(new Token(Kind.OP_DIV, startPos, 1));
+						state = State.START;
+					}
+				}
+				break;
+				
 				case FOR_DIGITS: {
 					int numOfDots = 0;
+					//terminate when second dot is encountered, it is treated separately
 					if ((Character.isDigit(ch) || ch == '.') && numOfDots <= 1) {
 						if (ch == '.') numOfDots++;
 						pos++;
@@ -574,16 +593,22 @@ public class Scanner {
 						String token = String.copyValueOf(chars, startPos, pos-startPos);
 						
 						//if the string has . in between, consider it as a float value
-						if (token.contains(".") && !token.endsWith(".")) {
+						if (token.contains(".") && !token.endsWith(".")) { //12.34 is treated as float value
 							try {
 								Float.parseFloat(token);
 								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
 							} catch (Exception e) {
 								throw new LexicalException("Lexical Exception character ", startPos);
 							}
-						} else if (token.endsWith(".")) {
-							
-						} else {
+						} else if (token.contains(".") && token.endsWith(".")) { //1234. is treated as an integer followed by a dot separator
+							try {
+								Integer.parseInt(token);
+								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, pos-startPos-1));
+							} catch (Exception e) {
+								throw new LexicalException("Lexical Exception character ", startPos);
+							}
+							tokens.add(new Token(Kind.DOT, pos, 1));
+						} else { //if there is not dot in the string consider it as an integer
 							try {
 								Integer.parseInt(token);
 								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, pos-startPos));
@@ -611,6 +636,29 @@ public class Scanner {
 						state = State.START;
 					}
 				}
+				break;
+				
+				case AFTER_COMMENTSTART: {
+					if (ch == '*') {
+						pos++;
+						ch = pos < chars.length ? chars[pos] : EOFChar;
+						if (ch == '/' ) {
+							pos++;
+							state = State.START;
+						} else if (ch == EOFChar) {
+							state = State.START;
+						} else {
+							state = State.AFTER_COMMENTSTART;
+						}
+					} else if (ch == EOFChar) {
+						state = State.START;
+					} else {
+						pos++;
+						state = State.AFTER_COMMENTSTART;
+					}
+				}
+				break;
+				
 				default: {
 					error(pos, 0, 0, "undefined state");
 				}
