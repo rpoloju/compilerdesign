@@ -475,8 +475,9 @@ public class Scanner {
 							} else if (Character.isLetter(ch)) {
 								state = State.FOR_IDENTIFIERS;
 								pos++;
+							} else {
+								error(pos, line(pos), posInLine(pos), "illegal char");
 							}
-							error(pos, line(pos), posInLine(pos), "illegal char");
 						}
 					}//switch ch
 				}
@@ -651,7 +652,10 @@ public class Scanner {
 							state = State.AFTER_COMMENTSTART;
 						}
 					} else if (ch == EOFChar) {
+						error(pos, line(pos), posInLine(pos), "Comments not closed properly"); 
 						state = State.START;
+					} else if (ch == '\n' || ch == '\r' || ch == '\t' || ch == '\f') {
+						pos++;
 					} else {
 						pos++;
 						state = State.AFTER_COMMENTSTART;

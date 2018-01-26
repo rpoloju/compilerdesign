@@ -181,7 +181,64 @@ public class ScannerTest {
 		checkNextIsEOF(scanner);
 	}
 	
-
+	@Test
+	public void testInteger() throws LexicalException {
+		String input = "123";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 3, 1, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testComments() throws LexicalException {
+		String input = "456/*This is shit*/123";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 19, 3, 1, 20);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testNewLine() throws LexicalException {
+		String input = "4\n5";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 2, 1, 2, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testAssign() throws LexicalException {
+		String input = "/*commented*/boolean b := true";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, KW_boolean, 13, 7, 1, 14);
+		checkNext(scanner, IDENTIFIER, 21, 1, 1, 22);
+		checkNext(scanner, OP_ASSIGN, 23, 2, 1, 24);
+		checkNext(scanner, BOOLEAN_LITERAL, 26, 4, 1, 27);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testMultilineComments() throws LexicalException {
+		String input = "123/*shit\nshitagain*/boolean b := true";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, KW_boolean, 21, 7, 2, 12);
+		checkNext(scanner, IDENTIFIER, 29, 1, 2, 20);
+		checkNext(scanner, OP_ASSIGN, 31, 2, 2, 22);
+		checkNext(scanner, BOOLEAN_LITERAL, 34, 4, 2, 25);
+		checkNextIsEOF(scanner);
+	}
 	
 }
 	
