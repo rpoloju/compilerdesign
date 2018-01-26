@@ -166,6 +166,32 @@ public class ScannerTest {
 			throw e;                    //Rethrow exception so JUnit will see it
 		}
 	}
+	
+	@Test
+	public void testOperators1() throws LexicalException {
+		String input = "float x = 3 >= 4 ? 10.5 : 20.5";
+		Scanner scanner;
+		show(input);
+		thrown.expect(LexicalException.class);
+		try {
+			scanner = new Scanner(input).scan();
+			show(scanner);
+			checkNext(scanner, KW_float, 0, 5, 1, 1);
+			checkNext(scanner, IDENTIFIER, 6, 1, 1, 7);
+			checkNext(scanner, INTEGER_LITERAL, 10, 1, 1, 11);
+			checkNext(scanner, OP_GE, 12, 2, 1, 13);
+			checkNext(scanner, INTEGER_LITERAL, 15, 1, 1, 16);
+			checkNext(scanner, OP_QUESTION, 17, 1, 1, 18);
+			checkNext(scanner, FLOAT_LITERAL, 19, 4, 1, 20);
+			checkNext(scanner, OP_COLON, 24, 1, 1, 25);
+			checkNext(scanner, FLOAT_LITERAL, 26, 4, 1, 27);
+			checkNextIsEOF(scanner);
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(8,e.getPos());
+			throw e;
+		}
+	}
 
 
 
@@ -188,6 +214,17 @@ public class ScannerTest {
 		show(input);
 		show(scanner);
 		checkNext(scanner, INTEGER_LITERAL, 0, 3, 1, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testIntegerStattingZero() throws LexicalException {
+		String input = "0123";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 1, 3, 1, 2);
 		checkNextIsEOF(scanner);
 	}
 	

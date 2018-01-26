@@ -321,7 +321,7 @@ public class Scanner {
 
 	 private enum State {
 		 START, AFTER_TIMES, AFTER_LESS, AFTER_GREATER, AFTER_NOT, AFTER_COLON, AFTER_EQUAL, FOR_DIGITS, FOR_IDENTIFIERS, AFTER_DOT, AFTER_SLASH,
-		 AFTER_COMMENTSTART};  //TODO:  this is incomplete
+		 AFTER_COMMENTSTART, AFTER_ZERO, AFTER_ZERODOT};  //TODO:  this is incomplete
 
 	 
 	 //TODO: Modify this to deal with the entire lexical specification
@@ -464,6 +464,11 @@ public class Scanner {
 							pos++;
 						}
 						break;
+						case '0': {
+							state = State.AFTER_ZERO;
+							pos++;
+						}
+						break;
 						
 						
 						
@@ -548,6 +553,10 @@ public class Scanner {
 					if (ch == '=') {
 						tokens.add(new Token(Kind.OP_EQ, startPos, 2));
 						pos++;
+					} else {
+						//throw new LexicalException("Lexical Exception at character ", pos-1);
+						pos--;
+						error(pos, line(pos), posInLine(pos), "illegal char");
 					}
 					state = State.START;
 				}
@@ -579,6 +588,33 @@ public class Scanner {
 						pos++;
 					} else {
 						tokens.add(new Token(Kind.OP_DIV, startPos, 1));
+						state = State.START;
+					}
+				}
+				break;
+				
+				case AFTER_ZERO: {
+					if (ch == '.') {
+						state = State.AFTER_ZERODOT;
+						pos++;
+					} else {
+						pos--;
+						tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
+					}
+				}
+				break;
+				
+				case AFTER_ZERODOT: {
+					if (Character.isDigit(ch)) {
+						pos++;
+					} else {
+						String token = String.copyValueOf(chars, startPos, pos-startPos);
+						try {
+							Float.parseFloat(token);
+							tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
+						} catch (Exception e) {
+							throw new LexicalException("Lexical Exception character ", startPos);
+						}
 						state = State.START;
 					}
 				}
