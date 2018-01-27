@@ -559,6 +559,17 @@ public class ScannerTest {
 	}
 	
 	@Test
+	public void testDot() throws LexicalException {
+		String input = "1.2.3";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 3, 2, 1, 4);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
 	public void failForIntOverflow() throws LexicalException {
 		String input = "2147483648";
 		show(input);

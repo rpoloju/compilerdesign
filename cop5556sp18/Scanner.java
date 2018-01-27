@@ -589,7 +589,7 @@ public class Scanner {
 								Float.parseFloat(token);
 								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
 							} catch (Exception e) {
-								throw new LexicalException("Lexical Exception at character ", startPos);
+								throw new LexicalException("Lexical Exception at character ", pos);
 							}
 						}
 						state = State.START;
@@ -612,13 +612,6 @@ public class Scanner {
 					if (ch == '.') {
 						pos++;
 						state = State.AFTER_ZERODOT;
-						/*if (Character.isDigit(chars[pos])) {
-							state = State.AFTER_ZERODOT;
-						} else {
-							tokens.add(new Token(Kind.INTEGER_LITERAL, pos-2, 1));
-							tokens.add(new Token(Kind.DOT, pos-1, 1));
-							state = State.START;
-						}*/
 					} else {
 						tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
 						state = State.START;
@@ -643,30 +636,23 @@ public class Scanner {
 				break;
 				
 				case FOR_DIGITS: {
-					int numOfDots = 0;
+					String tempToken = String.copyValueOf(chars, startPos, pos-startPos);
 					//terminate when second dot is encountered, it is treated separately
-					if ((Character.isDigit(ch) || ch == '.') && numOfDots <= 1) {
-						if (ch == '.') numOfDots++;
+					if (Character.isDigit(ch)) {
+						pos++;
+					} else if (ch == '.' && !tempToken.contains(".")) {
 						pos++;
 					} else {
 						String token = String.copyValueOf(chars, startPos, pos-startPos);
 						
-						//if the string has . in between, consider it as a float value
-						if (token.contains(".") && !token.endsWith(".")) { //12.34 is treated as float value
+						//if the string has '.' consider it as a float value
+						if (token.contains(".")) { //12.34 is treated as float value
 							try {
 								Float.parseFloat(token);
 								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
 							} catch (Exception e) {
 								throw new LexicalException("Lexical Exception ", startPos);
 							}
-						} else if (token.contains(".") && token.endsWith(".")) { //1234. is treated as an integer followed by a dot separator
-							try {
-								Integer.parseInt(token);
-								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, pos-startPos-1));
-							} catch (Exception e) {
-								throw new LexicalException("Lexical Exception ", pos);
-							}
-							tokens.add(new Token(Kind.DOT, pos, 1));
 						} else { //if there is not dot in the string consider it as an integer
 							try {
 								Integer.parseInt(token);
@@ -705,6 +691,7 @@ public class Scanner {
 							pos++;
 							state = State.START;
 						} else if (ch == EOFChar) {
+							error(pos, line(pos), posInLine(pos), "Comments not closed properly"); 
 							state = State.START;
 						} else {
 							state = State.AFTER_COMMENTSTART;
