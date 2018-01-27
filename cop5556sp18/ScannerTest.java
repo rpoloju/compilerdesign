@@ -427,8 +427,7 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(input).scan();
 		show(input);
 		show(scanner);
-		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
-		checkNext(scanner, DOT, 1, 1, 1, 2);
+		checkNext(scanner, FLOAT_LITERAL, 0, 2, 1, 1);
 		checkNext(scanner, FLOAT_LITERAL, 2, 2, 1, 3);
 		checkNextIsEOF(scanner);
 	}
@@ -439,8 +438,7 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(input).scan();
 		show(input);
 		show(scanner);
-		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
-		checkNext(scanner, DOT, 1, 1, 1, 2);
+		checkNext(scanner, FLOAT_LITERAL, 0, 2, 1, 1);
 		checkNext(scanner, KW_sin, 2, 3, 1, 3);
 		checkNextIsEOF(scanner);
 	}
@@ -451,12 +449,21 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(input).scan();
 		show(input);
 		show(scanner);
-		checkNext(scanner, KW_sin, 0, 3, 1, 1);
-		checkNext(scanner, KW_cos, 3, 3, 1, 4);
-		checkNext(scanner, KW_atan, 6, 4, 1, 7);
-		checkNext(scanner, KW_log, 10, 3, 1, 11);
-		checkNext(scanner, BOOLEAN_LITERAL, 13, 4, 1, 14);
-		checkNext(scanner, KW_abs, 17, 3, 1, 18);
+		checkNext(scanner, IDENTIFIER, 0, 20, 1, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testNewLine1() throws LexicalException {
+		String input = "\n\n\n12\n\n34\n.\n0\n>=";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 3, 2, 4, 1);
+		checkNext(scanner, INTEGER_LITERAL, 7, 2, 6, 1);
+		checkNext(scanner, DOT, 10, 1, 7, 1);
+		checkNext(scanner, INTEGER_LITERAL, 12, 1, 8, 1);
+		checkNext(scanner, OP_GE, 14, 2, 9, 1);
 		checkNextIsEOF(scanner);
 	}
 	
