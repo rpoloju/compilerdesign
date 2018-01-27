@@ -20,6 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import cop5556sp18.Scanner.Kind;
 import cop5556sp18.Scanner.LexicalException;
 import cop5556sp18.Scanner.Token;
 import static cop5556sp18.Scanner.Kind.*;
@@ -154,8 +155,22 @@ public class ScannerTest {
 	 * @throws LexicalException
 	 */
 	@Test
-	public void failIllegalChar() throws LexicalException {
+	public void failIllegalChar1() throws LexicalException {
 		String input = ";;~";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(2,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
+	
+	@Test
+	public void failIllegalChar2() throws LexicalException {
+		String input = "x = 4";
 		show(input);
 		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
 		try {
@@ -192,6 +207,25 @@ public class ScannerTest {
 			throw e;
 		}
 	}
+	
+	@Test
+	public void testEqual() throws LexicalException {
+		String input = "float x :=3 >= 4 ? 10.5 : 20.5";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, KW_float, 0, 5, 1, 1);
+		checkNext(scanner, IDENTIFIER, 6, 1, 1, 7);
+		checkNext(scanner, OP_ASSIGN, 8, 2, 1, 9);
+		checkNext(scanner, INTEGER_LITERAL, 10, 1, 1, 11);
+		checkNext(scanner, OP_GE, 12, 2, 1, 13);
+		checkNext(scanner, INTEGER_LITERAL, 15, 1, 1, 16);
+		checkNext(scanner, OP_QUESTION, 17, 1, 1, 18);
+		checkNext(scanner, FLOAT_LITERAL, 19, 4, 1, 20);
+		checkNext(scanner, OP_COLON, 24, 1, 1, 25);
+		checkNext(scanner, FLOAT_LITERAL, 26, 4, 1, 27);
+		checkNextIsEOF(scanner);
+	}
 
 
 
@@ -225,6 +259,63 @@ public class ScannerTest {
 		show(scanner);
 		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
 		checkNext(scanner, INTEGER_LITERAL, 1, 3, 1, 2);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testFloat1() throws LexicalException {
+		String input = "0.01";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testFloat2() throws LexicalException {
+		String input = "0.00";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testFloat3() throws LexicalException {
+		String input = "0.01\n1";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 5, 1, 2, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testFloat4() throws LexicalException {
+		String input = "0.01.3";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 4, 2, 1, 5);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testFloat5() throws LexicalException {
+		String input = "0.00.000.00.0.0.00";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 4, 4, 1, 5);
+		checkNext(scanner, FLOAT_LITERAL, 8, 3, 1, 9);
+		checkNext(scanner, FLOAT_LITERAL, 11, 2, 1, 12);
+		checkNext(scanner, FLOAT_LITERAL, 13, 2, 1, 14);
+		checkNext(scanner, FLOAT_LITERAL, 15, 3, 1, 16);
 		checkNextIsEOF(scanner);
 	}
 	
@@ -274,6 +365,98 @@ public class ScannerTest {
 		checkNext(scanner, IDENTIFIER, 29, 1, 2, 20);
 		checkNext(scanner, OP_ASSIGN, 31, 2, 2, 22);
 		checkNext(scanner, BOOLEAN_LITERAL, 34, 4, 2, 25);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testKeyWords1() throws LexicalException {
+		String input = "int x := sin(90);";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, KW_int, 0, 3, 1, 1);
+		checkNext(scanner, IDENTIFIER, 4, 1, 1, 5);
+		checkNext(scanner, OP_ASSIGN, 6, 2, 1, 7);
+		checkNext(scanner, KW_sin, 9, 3, 1, 10);
+		checkNext(scanner, LPAREN, 12, 1, 1, 13);
+		checkNext(scanner, INTEGER_LITERAL, 13, 2, 1, 14);
+		checkNext(scanner, RPAREN, 15, 1, 1, 16);
+		checkNext(scanner, SEMI, 16, 1, 1, 17);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testKeyWords2() throws LexicalException {
+		String input = "flo\nat";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, IDENTIFIER, 0, 3, 1, 1);
+		checkNext(scanner, IDENTIFIER, 4, 2, 2, 1);
+		checkNextIsEOF(scanner);
+	}
+	
+	
+	@Test
+	public void testZero() throws LexicalException {
+		String input = "000";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 1, 1, 1, 2);
+		checkNext(scanner, INTEGER_LITERAL, 2, 1, 1, 3);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testDot1() throws LexicalException {
+		String input = "0.1.a";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, DOT, 3, 1, 1, 4);
+		checkNext(scanner, IDENTIFIER, 4, 1, 1, 5);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testDot2() throws LexicalException {
+		String input = "0..1";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, DOT, 1, 1, 1, 2);
+		checkNext(scanner, FLOAT_LITERAL, 2, 2, 1, 3);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testDot3() throws LexicalException {
+		String input = "0.sin";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, DOT, 1, 1, 1, 2);
+		checkNext(scanner, KW_sin, 2, 3, 1, 3);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testKeyWords3() throws LexicalException {
+		String input = "sincosatanlogtrueabs";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, KW_sin, 0, 3, 1, 1);
+		checkNext(scanner, KW_cos, 3, 3, 1, 4);
+		checkNext(scanner, KW_atan, 6, 4, 1, 7);
+		checkNext(scanner, KW_log, 10, 3, 1, 11);
+		checkNext(scanner, BOOLEAN_LITERAL, 13, 4, 1, 14);
+		checkNext(scanner, KW_abs, 17, 3, 1, 18);
 		checkNextIsEOF(scanner);
 	}
 	

@@ -423,6 +423,10 @@ public class Scanner {
 							pos++;
 						}
 						break;
+						case 'Z': {
+							tokens.add(new Token(Kind.KW_Z, startPos, 1));
+						}
+						break;
 						//state change
 						case '*': {
 							state = State.AFTER_TIMES;
@@ -595,11 +599,17 @@ public class Scanner {
 				
 				case AFTER_ZERO: {
 					if (ch == '.') {
-						state = State.AFTER_ZERODOT;
 						pos++;
+						if (Character.isDigit(chars[pos])) {
+							state = State.AFTER_ZERODOT;
+						} else {
+							tokens.add(new Token(Kind.INTEGER_LITERAL, pos-2, 1));
+							tokens.add(new Token(Kind.DOT, pos-1, 1));
+							state = State.START;
+						}
 					} else {
-						pos--;
 						tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
+						state = State.START;
 					}
 				}
 				break;
@@ -660,7 +670,16 @@ public class Scanner {
 				
 				case FOR_IDENTIFIERS: {
 					if (Character.isLetterOrDigit(ch) || ch == '$' || ch == '_' ) {
-						pos++;
+						String tempToken = String.copyValueOf(chars, startPos, pos-startPos);
+						if (tempToken.equals("true") || tempToken.equals("false")) {
+							tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos-startPos));
+							state = State.START;
+						} else if (resWords.containsKey(tempToken)) {
+							tokens.add(new Token(resWords.get(tempToken), startPos, pos-startPos));
+							state = State.START;
+						} else {
+							pos++;
+						}
 					} else {
 						String token = String.copyValueOf(chars, startPos, pos-startPos);
 						if (token.equals("true") || token.equals("false")) {
