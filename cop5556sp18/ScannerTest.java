@@ -177,7 +177,7 @@ public class ScannerTest {
 			new Scanner(input).scan();
 		} catch (LexicalException e) {  //Catch the exception
 			show(e);                    //Display it
-			assertEquals(2,e.getPos()); //Check that it occurred in the expected position
+			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
 			throw e;                    //Rethrow exception so JUnit will see it
 		}
 	}
@@ -203,7 +203,7 @@ public class ScannerTest {
 			checkNextIsEOF(scanner);
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(8,e.getPos());
+			assertEquals(9,e.getPos());
 			throw e;
 		}
 	}
@@ -465,6 +465,95 @@ public class ScannerTest {
 		checkNext(scanner, INTEGER_LITERAL, 12, 1, 8, 1);
 		checkNext(scanner, OP_GE, 14, 2, 9, 1);
 		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testDots() throws LexicalException {
+		String input = "..0.3..20....";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, DOT, 0, 1, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 1, 2, 1, 2);
+		checkNext(scanner, FLOAT_LITERAL, 3, 2, 1, 4);
+		checkNext(scanner, DOT, 5, 1, 1, 6);
+		checkNext(scanner, FLOAT_LITERAL, 6, 3, 1, 7);
+		checkNext(scanner, DOT, 9, 1, 1, 10);
+		checkNext(scanner, DOT, 10, 1, 1, 11);
+		checkNext(scanner, DOT, 11, 1, 1, 12);
+		checkNext(scanner, DOT, 12, 1, 1, 13);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testIdentifier2() throws LexicalException {
+		String input = "num1.*num2";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, IDENTIFIER, 0, 4, 1, 1);
+		checkNext(scanner, DOT, 4, 1, 1, 5);
+		checkNext(scanner, OP_TIMES, 5, 1, 1, 6);
+		checkNext(scanner, IDENTIFIER, 6, 4, 1, 7);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void testIdentifier1() throws LexicalException {
+		String input = "num1$$1$..@num__1*1";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, IDENTIFIER, 0, 8, 1, 1);
+		checkNext(scanner, DOT, 8, 1, 1, 9);
+		checkNext(scanner, DOT,9, 1, 1, 10);
+		checkNext(scanner, OP_AT, 10, 1, 1, 11);
+		checkNext(scanner, IDENTIFIER, 11, 6, 1, 12);
+		checkNext(scanner, OP_TIMES, 17, 1, 1, 18);
+		checkNext(scanner, INTEGER_LITERAL, 18, 1, 1, 19);
+		checkNextIsEOF(scanner);
+	}
+	
+	@Test
+	public void failForEquals() throws LexicalException {
+		String input = "=====q";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(5,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
+	
+	@Test
+	public void failForCommentNotClosed() throws LexicalException {
+		String input = "/*test";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(6,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
+	
+	@Test
+	public void failForIntOverflow() throws LexicalException {
+		String input = "2147483648";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(10,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
 	}
 	
 }
