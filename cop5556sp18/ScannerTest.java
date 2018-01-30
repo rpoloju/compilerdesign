@@ -583,6 +583,34 @@ public class ScannerTest {
 		}
 	}
 	
+	@Test
+	public void failForUnclosedComment() throws LexicalException {
+		String input = "/**";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
+	
+	@Test
+	public void testDot4() throws LexicalException {
+		String input = "..1..";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, DOT, 0, 1, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 1, 2, 1, 2);
+		checkNext(scanner, DOT, 3, 1, 1, 4);
+		checkNext(scanner, DOT, 4, 1, 1, 5);
+		checkNextIsEOF(scanner);
+	}
+	
+	
 }
 	
 
