@@ -47,7 +47,7 @@ public class Scanner {
 		OP_GE/* >= */, OP_LE/* <= */, OP_GT/* > */, OP_LT/* < */, OP_AND/* & */, OP_OR/* | */, 
 		OP_PLUS/* +*/, OP_MINUS/* - */, OP_TIMES/* * */, OP_DIV/* / */, OP_MOD/* % */, OP_POWER/* ** */, 
 		OP_AT/* @ */, LPAREN/*( */, RPAREN/* ) */, LSQUARE/* [ */, RSQUARE/* ] */, LBRACE /*{ */, 
-		RBRACE /* } */, LPIXEL /* << */, RPIXEL /* >> */, SEMI/* ; */, COMMA/* , */, DOT /* . */, EOF;
+		RBRACE /* } */, LPIXEL /* << */, RPIXEL /* >> */, SEMI/* ; */, COMMA/* , */, DOT /* . */, EOF, KW_sleep;
 	}
 
 	/**
@@ -309,21 +309,22 @@ public class Scanner {
 		resWords.put("boolean", Kind.KW_boolean);
 		resWords.put("red", Kind.KW_red);
 		resWords.put("green", Kind.KW_green);
+		resWords.put("blue", Kind.KW_blue);
 		resWords.put("alpha", Kind.KW_alpha);
 		resWords.put("while", Kind.KW_while);
 		resWords.put("if", Kind.KW_if);
 		resWords.put("width", Kind.KW_width);
 		resWords.put("height", Kind.KW_height);
+		resWords.put("sleep", Kind.KW_sleep);
 	}
 
 
 
 
-	 private enum State {
-		 START, AFTER_TIMES, AFTER_LESS, AFTER_GREATER, AFTER_NOT, AFTER_COLON, AFTER_EQUAL, FOR_DIGITS, FOR_IDENTIFIERS, AFTER_DOT, AFTER_SLASH,
-		 AFTER_COMMENTSTART, AFTER_ZERO, AFTER_ZERODOT, AFTER_Z};  //TODO:  this is incomplete
+	private enum State {
+		START, AFTER_TIMES, AFTER_LESS, AFTER_GREATER, AFTER_NOT, AFTER_COLON, AFTER_EQUAL, FOR_DIGITS, FOR_IDENTIFIERS, AFTER_DOT, AFTER_SLASH, AFTER_COMMENTSTART, AFTER_ZERO, AFTER_ZERODOT, AFTER_Z
+	}; // TODO: this is incomplete
 
-	 
 	 //TODO: Modify this to deal with the entire lexical specification
 	public Scanner scan() throws LexicalException {
 		int pos = 0;
@@ -331,389 +332,385 @@ public class Scanner {
 		int startPos = 0;
 		while (pos < chars.length) {
 			char ch = chars[pos];
-			switch(state) {
-				case START: {
-					startPos = pos;
-					switch (ch) {
-						case ' ':
-						case '\n':
-						case '\r':
-						case '\t':
-						case '\f': {
-							pos++;
-						}
-						break;
-						case EOFChar: {
-							tokens.add(new Token(Kind.EOF, startPos, 0));
-							pos++; // next iteration will terminate loop
-						}
-						break;
-						case ';': {
-							tokens.add(new Token(Kind.SEMI, startPos, pos - startPos + 1));
-							pos++;
-						}
-						break;
-						case '(': {
-							tokens.add(new Token(Kind.LPAREN, startPos, 1));
-							pos++;
-						}
-						break;
-						case ')': {
-							tokens.add(new Token(Kind.RPAREN, startPos, 1));
-							pos++;
-						}
-						break;
-						case '+': {
-							tokens.add(new Token(Kind.OP_PLUS, startPos, 1));
-							pos++;
-						}
-						break;
-						case '-': {
-							tokens.add(new Token(Kind.OP_MINUS, startPos, 1));
-							pos++;
-						}
-						break;
-						case '%': {
-							tokens.add(new Token(Kind.OP_MOD, startPos, 1));
-							pos++;
-						}
-						break;
-						case ',': {
-							tokens.add(new Token(Kind.COMMA, startPos, 1));
-							pos++;
-						}
-						break;
-						case '{': {
-							tokens.add(new Token(Kind.LBRACE, startPos, 1));
-							pos++;
-						}
-						break;
-						case '}': {
-							tokens.add(new Token(Kind.RBRACE, startPos, 1));
-							pos++;
-						}
-						break;
-						case '[': {
-							tokens.add(new Token(Kind.LSQUARE, startPos, 1));
-							pos++;
-						}
-						break;
-						case ']': {
-							tokens.add(new Token(Kind.RSQUARE, startPos, 1));
-							pos++;
-						}
-						break;
-						case '&': {
-							tokens.add(new Token(Kind.OP_AND, startPos, 1));
-							pos++;
-						}
-						break;
-						case '|': {
-							tokens.add(new Token(Kind.OP_OR, startPos, 1));
-							pos++;
-						}
-						break;
-						case '@': {
-							tokens.add(new Token(Kind.OP_AT, startPos, 1));
-							pos++;
-						}
-						break;
-						case '?': {
-							tokens.add(new Token(Kind.OP_QUESTION, startPos, 1));
-							pos++;
-						}
-						break;
-						case 'Z': {
-							state = State.AFTER_Z;
-							//tokens.add(new Token(Kind.KW_Z, startPos, 1));
-							pos++;
-						}
-						break;
-						//state change
-						case '*': {
-							state = State.AFTER_TIMES;
-							pos++;
-						}
-						break;
-						case '<': {
-							state = State.AFTER_LESS;
-							pos++;
-						}
-						break;
-						case '>': {
-							state = State.AFTER_GREATER;
-							pos++;
-						}
-						break;
-						case '!': {
-							state = State.AFTER_NOT;
-							pos++;
-						}
-						break;
-						case ':': {
-							state = State.AFTER_COLON;
-							pos++;
-						}
-						break;
-						case '=': {
-							state = State.AFTER_EQUAL;
-							pos++;
-						}
-						break;
-						case '.': {
-							state = State.AFTER_DOT;
-							pos++;
-						}
-						break;
-						case '/': {
-							state = State.AFTER_SLASH;
-							pos++;
-						}
-						break;
-						case '0': {
-							state = State.AFTER_ZERO;
-							pos++;
-						}
-						break;
-						
-						
-						
-						
-						default: {
-							if (Character.isDigit(ch)) {
-								state = State.FOR_DIGITS;
-								pos++;
-							} else if (Character.isLetter(ch)) {
-								state = State.FOR_IDENTIFIERS;
-								pos++;
-							} else {
-								error(pos, line(pos), posInLine(pos), "illegal char");
-							}
-						}
-					}//switch ch
+			switch (state) {
+			case START: {
+				startPos = pos;
+				switch (ch) {
+				case ' ':
+				case '\n':
+				case '\r':
+				case '\t':
+				case '\f': {
+					pos++;
 				}
-				break;
-				
-				case AFTER_Z: {
-					if (Character.isLetterOrDigit(ch) || ch == '$' || ch == '_') {
+					break;
+				case EOFChar: {
+					tokens.add(new Token(Kind.EOF, startPos, 0));
+					pos++; // next iteration will terminate loop
+				}
+					break;
+				case ';': {
+					tokens.add(new Token(Kind.SEMI, startPos, pos - startPos + 1));
+					pos++;
+				}
+					break;
+				case '(': {
+					tokens.add(new Token(Kind.LPAREN, startPos, 1));
+					pos++;
+				}
+					break;
+				case ')': {
+					tokens.add(new Token(Kind.RPAREN, startPos, 1));
+					pos++;
+				}
+					break;
+				case '+': {
+					tokens.add(new Token(Kind.OP_PLUS, startPos, 1));
+					pos++;
+				}
+					break;
+				case '-': {
+					tokens.add(new Token(Kind.OP_MINUS, startPos, 1));
+					pos++;
+				}
+					break;
+				case '%': {
+					tokens.add(new Token(Kind.OP_MOD, startPos, 1));
+					pos++;
+				}
+					break;
+				case ',': {
+					tokens.add(new Token(Kind.COMMA, startPos, 1));
+					pos++;
+				}
+					break;
+				case '{': {
+					tokens.add(new Token(Kind.LBRACE, startPos, 1));
+					pos++;
+				}
+					break;
+				case '}': {
+					tokens.add(new Token(Kind.RBRACE, startPos, 1));
+					pos++;
+				}
+					break;
+				case '[': {
+					tokens.add(new Token(Kind.LSQUARE, startPos, 1));
+					pos++;
+				}
+					break;
+				case ']': {
+					tokens.add(new Token(Kind.RSQUARE, startPos, 1));
+					pos++;
+				}
+					break;
+				case '&': {
+					tokens.add(new Token(Kind.OP_AND, startPos, 1));
+					pos++;
+				}
+					break;
+				case '|': {
+					tokens.add(new Token(Kind.OP_OR, startPos, 1));
+					pos++;
+				}
+					break;
+				case '@': {
+					tokens.add(new Token(Kind.OP_AT, startPos, 1));
+					pos++;
+				}
+					break;
+				case '?': {
+					tokens.add(new Token(Kind.OP_QUESTION, startPos, 1));
+					pos++;
+				}
+					break;
+				case 'Z': {
+					state = State.AFTER_Z;
+					// tokens.add(new Token(Kind.KW_Z, startPos, 1));
+					pos++;
+				}
+					break;
+				// state change
+				case '*': {
+					state = State.AFTER_TIMES;
+					pos++;
+				}
+					break;
+				case '<': {
+					state = State.AFTER_LESS;
+					pos++;
+				}
+					break;
+				case '>': {
+					state = State.AFTER_GREATER;
+					pos++;
+				}
+					break;
+				case '!': {
+					state = State.AFTER_NOT;
+					pos++;
+				}
+					break;
+				case ':': {
+					state = State.AFTER_COLON;
+					pos++;
+				}
+					break;
+				case '=': {
+					state = State.AFTER_EQUAL;
+					pos++;
+				}
+					break;
+				case '.': {
+					state = State.AFTER_DOT;
+					pos++;
+				}
+					break;
+				case '/': {
+					state = State.AFTER_SLASH;
+					pos++;
+				}
+					break;
+				case '0': {
+					state = State.AFTER_ZERO;
+					pos++;
+				}
+					break;
+
+				default: {
+					if (Character.isDigit(ch)) {
+						state = State.FOR_DIGITS;
+						pos++;
+					} else if (Character.isLetter(ch)) {
 						state = State.FOR_IDENTIFIERS;
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.KW_Z, startPos, 1));
-						state = State.START;
-					}
-				}
-				break;
-				
-				case AFTER_TIMES: {
-					if (ch == '*'){
-	            		tokens.add(new Token(Kind.OP_POWER, startPos, 2));
-	            		pos++;
-	            	} else {
-	            		tokens.add(new Token(Kind.OP_TIMES, startPos, 1));
-	            	}
-	            	state = State.START;
-				}
-				break;
-				
-				case AFTER_LESS: {
-					if (ch == '=') {
-						tokens.add(new Token(Kind.OP_LE, startPos, 2));
-						pos++;
-					} else if (ch == '<') {
-						tokens.add(new Token(Kind.LPIXEL, startPos, 2));
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.OP_LT, startPos, 1));
-					}
-					state = State.START;
-				}
-				break;
-				
-				case AFTER_GREATER: {
-					if (ch == '=') {
-						tokens.add(new Token(Kind.OP_GE, startPos, 2));
-						pos++;
-					} else if (ch == '>') {
-						tokens.add(new Token(Kind.RPIXEL, startPos, 2));
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.OP_GT, startPos, 1));
-					}
-					state = State.START;
-				}
-				break;
-				
-				case AFTER_NOT: {
-					if (ch == '=') {
-						tokens.add(new Token(Kind.OP_NEQ, startPos, 2));
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.OP_EXCLAMATION, startPos, 1));
-					}
-					state = State.START;
-				}
-				break;
-				
-				case AFTER_COLON: {
-					if (ch == '=') {
-						tokens.add(new Token(Kind.OP_ASSIGN, startPos, 2));
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.OP_COLON, startPos, 1));
-					}
-					state = State.START;
-				}
-				break;
-				
-				case AFTER_EQUAL: {
-					if (ch == '=') {
-						tokens.add(new Token(Kind.OP_EQ, startPos, 2));
 						pos++;
 					} else {
 						error(pos, line(pos), posInLine(pos), "illegal char");
 					}
+				}
+				}// switch ch
+			}
+				break;
+
+			case AFTER_Z: {
+				if (Character.isLetterOrDigit(ch) || ch == '$' || ch == '_') {
+					state = State.FOR_IDENTIFIERS;
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.KW_Z, startPos, 1));
 					state = State.START;
 				}
+			}
 				break;
-				
-				case AFTER_DOT: {
-					if (Character.isDigit(ch)) {
-						pos++;
-					} else {
-						String token = String.copyValueOf(chars, startPos, pos-startPos);
-						if (token.length() == 1) {
-							tokens.add(new Token(Kind.DOT, startPos, 1));
-						} else {
-							try {
-								Float.parseFloat(token);
-								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
-							} catch (Exception e) {
-								throw new LexicalException("Lexical Exception at character ", pos);
-							}
-						}
-						state = State.START;
-					}
+
+			case AFTER_TIMES: {
+				if (ch == '*') {
+					tokens.add(new Token(Kind.OP_POWER, startPos, 2));
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_TIMES, startPos, 1));
 				}
+				state = State.START;
+			}
 				break;
-				
-				case AFTER_SLASH: {
-					if (ch == '*') {
-						state = State.AFTER_COMMENTSTART;
-						pos++;
-					} else {
-						tokens.add(new Token(Kind.OP_DIV, startPos, 1));
-						state = State.START;
-					}
+
+			case AFTER_LESS: {
+				if (ch == '=') {
+					tokens.add(new Token(Kind.OP_LE, startPos, 2));
+					pos++;
+				} else if (ch == '<') {
+					tokens.add(new Token(Kind.LPIXEL, startPos, 2));
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_LT, startPos, 1));
 				}
+				state = State.START;
+			}
 				break;
-				
-				case AFTER_ZERO: {
-					if (ch == '.') {
-						pos++;
-						state = State.AFTER_ZERODOT;
-					} else {
-						tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
-						state = State.START;
-					}
+
+			case AFTER_GREATER: {
+				if (ch == '=') {
+					tokens.add(new Token(Kind.OP_GE, startPos, 2));
+					pos++;
+				} else if (ch == '>') {
+					tokens.add(new Token(Kind.RPIXEL, startPos, 2));
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_GT, startPos, 1));
 				}
+				state = State.START;
+			}
 				break;
-				
-				case AFTER_ZERODOT: {
-					if (Character.isDigit(ch)) {
-						pos++;
+
+			case AFTER_NOT: {
+				if (ch == '=') {
+					tokens.add(new Token(Kind.OP_NEQ, startPos, 2));
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_EXCLAMATION, startPos, 1));
+				}
+				state = State.START;
+			}
+				break;
+
+			case AFTER_COLON: {
+				if (ch == '=') {
+					tokens.add(new Token(Kind.OP_ASSIGN, startPos, 2));
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_COLON, startPos, 1));
+				}
+				state = State.START;
+			}
+				break;
+
+			case AFTER_EQUAL: {
+				if (ch == '=') {
+					tokens.add(new Token(Kind.OP_EQ, startPos, 2));
+					pos++;
+				} else {
+					error(pos, line(pos), posInLine(pos), "illegal char");
+				}
+				state = State.START;
+			}
+				break;
+
+			case AFTER_DOT: {
+				if (Character.isDigit(ch)) {
+					pos++;
+				} else {
+					String token = String.copyValueOf(chars, startPos, pos - startPos);
+					if (token.length() == 1) {
+						tokens.add(new Token(Kind.DOT, startPos, 1));
 					} else {
-						String token = String.copyValueOf(chars, startPos, pos-startPos);
 						try {
 							Float.parseFloat(token);
-							tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
+							tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos - startPos));
 						} catch (Exception e) {
-							throw new LexicalException("Lexical Exception ", pos);
+							throw new LexicalException("Lexical Exception at character ", startPos);
 						}
-						state = State.START;
 					}
+					state = State.START;
 				}
+			}
 				break;
-				
-				case FOR_DIGITS: {
-					String tempToken = String.copyValueOf(chars, startPos, pos-startPos);
-					//terminate when second dot is encountered, it is treated separately
-					if (Character.isDigit(ch)) {
-						pos++;
-					} else if (ch == '.' && !tempToken.contains(".")) {
-						pos++;
-					} else {
-						String token = String.copyValueOf(chars, startPos, pos-startPos);
-						
-						//if the string has '.' consider it as a float value
-						if (token.contains(".")) { //12.34 is treated as float value
-							try {
-								Float.parseFloat(token);
-								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos-startPos));
-							} catch (Exception e) {
-								throw new LexicalException("Lexical Exception ", startPos);
-							}
-						} else { //if there is not dot in the string consider it as an integer
-							try {
-								Integer.parseInt(token);
-								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, pos-startPos));
-							} catch (Exception e) {
-								throw new LexicalException("Lexical Exception ", pos);
-							}
-						}
-						state = State.START;
+
+			case AFTER_SLASH: {
+				if (ch == '*') {
+					state = State.AFTER_COMMENTSTART;
+					pos++;
+				} else {
+					tokens.add(new Token(Kind.OP_DIV, startPos, 1));
+					state = State.START;
+				}
+			}
+				break;
+
+			case AFTER_ZERO: {
+				if (ch == '.') {
+					pos++;
+					state = State.AFTER_ZERODOT;
+				} else {
+					tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
+					state = State.START;
+				}
+			}
+				break;
+
+			case AFTER_ZERODOT: {
+				if (Character.isDigit(ch)) {
+					pos++;
+				} else {
+					String token = String.copyValueOf(chars, startPos, pos - startPos);
+					try {
+						Float.parseFloat(token);
+						tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos - startPos));
+					} catch (Exception e) {
+						throw new LexicalException("Lexical Exception ", startPos);
 					}
+					state = State.START;
 				}
+			}
 				break;
-				
-				case FOR_IDENTIFIERS: {
-					if (Character.isLetterOrDigit(ch) || ch == '$' || ch == '_' ) {
-						pos++;
-					} else {
-						String token = String.copyValueOf(chars, startPos, pos-startPos);
-						if (token.equals("true") || token.equals("false")) {
-							tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos-startPos));
-						} else if (resWords.containsKey(token)) {
-							tokens.add(new Token(resWords.get(token), startPos, pos-startPos));
+
+			case FOR_DIGITS: {
+				String tempToken = String.copyValueOf(chars, startPos, pos - startPos);
+				// terminate when second dot is encountered, it is treated separately
+				if (Character.isDigit(ch)) {
+					pos++;
+				} else if (ch == '.' && !tempToken.contains(".")) {
+					pos++;
+				} else {
+					String token = String.copyValueOf(chars, startPos, pos - startPos);
+
+					// if the string has '.' consider it as a float value
+					if (token.contains(".")) { // 12.34 is treated as float value
+						if (Float.isFinite(Float.parseFloat(token))) {
+							tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, pos - startPos));
 						} else {
-							tokens.add(new Token(Kind.IDENTIFIER, startPos, pos-startPos));
+							throw new LexicalException("Lexical Exception ", startPos);
 						}
-						state = State.START;
+					} else { // if there is not dot in the string consider it as an integer
+						try {
+							Integer.parseInt(token);
+							tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, pos - startPos));
+						} catch (Exception e) {
+							throw new LexicalException("Lexical Exception ", startPos);
+						}
 					}
+					state = State.START;
 				}
+			}
 				break;
-				
-				case AFTER_COMMENTSTART: {
-					if (ch == '*') {
+
+			case FOR_IDENTIFIERS: {
+				if (Character.isLetterOrDigit(ch) || ch == '$' || ch == '_') {
+					pos++;
+				} else {
+					String token = String.copyValueOf(chars, startPos, pos - startPos);
+					if (token.equals("true") || token.equals("false")) {
+						tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos));
+					} else if (resWords.containsKey(token)) {
+						tokens.add(new Token(resWords.get(token), startPos, pos - startPos));
+					} else {
+						tokens.add(new Token(Kind.IDENTIFIER, startPos, pos - startPos));
+					}
+					state = State.START;
+				}
+			}
+				break;
+
+			case AFTER_COMMENTSTART: {
+				if (ch == '*') {
+					pos++;
+					ch = pos < chars.length ? chars[pos] : EOFChar;
+					if (ch == '/') {
 						pos++;
-						ch = pos < chars.length ? chars[pos] : EOFChar;
-						if (ch == '/' ) {
-							pos++;
-							state = State.START;
-						} else if (ch == EOFChar) {
-							error(pos, line(pos), posInLine(pos), "Comments not closed properly"); 
-							state = State.START;
-						} else {
-							state = State.AFTER_COMMENTSTART;
-						}
+						state = State.START;
 					} else if (ch == EOFChar) {
-						error(pos, line(pos), posInLine(pos), "Comments not closed properly"); 
+						error(pos, line(pos), posInLine(pos), "Comments not closed properly");
 						state = State.START;
-					} else if (ch == '\n' || ch == '\r' || ch == '\t' || ch == '\f') {
-						pos++;
 					} else {
-						pos++;
 						state = State.AFTER_COMMENTSTART;
 					}
+				} else if (ch == EOFChar) {
+					error(pos, line(pos), posInLine(pos), "Comments not closed properly");
+					state = State.START;
+				} else if (ch == '\n' || ch == '\r' || ch == '\t' || ch == '\f') {
+					pos++;
+				} else {
+					pos++;
+					state = State.AFTER_COMMENTSTART;
 				}
+			}
 				break;
-				
-				default: {
-					error(pos, 0, 0, "undefined state");
-				}
+
+			default: {
+				error(pos, 0, 0, "undefined state");
+			}
 			}// switch state
 		} // while
-			
+
 		return this;
 	}
 

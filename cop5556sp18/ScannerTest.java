@@ -22,10 +22,12 @@ import static cop5556sp18.Scanner.Kind.KW_boolean;
 import static cop5556sp18.Scanner.Kind.KW_float;
 import static cop5556sp18.Scanner.Kind.KW_int;
 import static cop5556sp18.Scanner.Kind.KW_sin;
+import static cop5556sp18.Scanner.Kind.KW_sleep;
 import static cop5556sp18.Scanner.Kind.LPAREN;
 import static cop5556sp18.Scanner.Kind.OP_ASSIGN;
 import static cop5556sp18.Scanner.Kind.OP_AT;
 import static cop5556sp18.Scanner.Kind.OP_COLON;
+import static cop5556sp18.Scanner.Kind.OP_DIV;
 import static cop5556sp18.Scanner.Kind.OP_GE;
 import static cop5556sp18.Scanner.Kind.OP_QUESTION;
 import static cop5556sp18.Scanner.Kind.OP_TIMES;
@@ -38,6 +40,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import cop5556sp18.Scanner.Kind;
 import cop5556sp18.Scanner.LexicalException;
 import cop5556sp18.Scanner.Token;
 
@@ -578,7 +581,7 @@ public class ScannerTest {
 			new Scanner(input).scan();
 		} catch (LexicalException e) {  //Catch the exception
 			show(e);                    //Display it
-			assertEquals(10,e.getPos()); //Check that it occurred in the expected position
+			assertEquals(0,e.getPos()); //Check that it occurred in the expected position
 			throw e;                    //Rethrow exception so JUnit will see it
 		}
 	}
@@ -610,7 +613,75 @@ public class ScannerTest {
 		checkNextIsEOF(scanner);
 	}
 	
+	@Test
+	public void failForFloatOverflow() throws LexicalException {
+		String input = "12345678910111213141516171819202122232425262728297384728379098989898098089809898989088989809890890809830.313233";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(0,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
 	
+	@Test
+	public void test57() throws LexicalException {
+		String input = ";;true : false 999990099988888888888886666666666644444444444.01444444444442222222222211111111111111112";
+		show(input);
+		thrown.expect(LexicalException.class);
+		try {
+			new Scanner(input).scan();
+		}
+		catch (LexicalException e) {
+			show(e);
+			assertEquals(15, e.getPos());
+			throw(e);
+		}
+	}
+	
+	@Test
+	public void testSleep() throws LexicalException {
+		String input = "0.abc/sleep";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL, 0, 2, 1, 1);
+		checkNext(scanner, IDENTIFIER, 2, 3, 1, 3);
+		checkNext(scanner, OP_DIV, 5, 1, 1, 6);
+		checkNext(scanner, KW_sleep, 6, 5, 1, 7);
+		checkNextIsEOF(scanner);
+	}
+	
+	 
+	@Test
+	public void testOverflow() throws LexicalException {
+		String input = "abc 9999999999919199199100100110101010100111.1 ";
+		show(input);
+		thrown.expect(LexicalException.class);
+		try {
+			new Scanner(input).scan();
+		}
+		catch (LexicalException e) {
+			show(e);
+			assertEquals(4, e.getPos());
+			throw(e);
+		}
+	}
+	
+	@Test
+	public void testKW() throws LexicalException {
+		String input = "red green blue";
+		Scanner scanner = new Scanner(input).scan();
+		show(input);
+		show(scanner);
+		checkNext(scanner, Kind.KW_red, 0, 3, 1, 1);
+		checkNext(scanner, Kind.KW_green, 4, 5, 1, 5);
+		checkNext(scanner, Kind.KW_blue, 10, 4, 1,11);
+		checkNextIsEOF(scanner);
+	}
 }
 	
 
