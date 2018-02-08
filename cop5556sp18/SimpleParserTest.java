@@ -94,6 +94,21 @@ public class SimpleParserTest {
 		SimpleParser parser = makeParser(input);
 		parser.parse();
 	}*/
+	
+	@Test
+	public void test1() throws LexicalException, SyntaxException {
+		String input = "b*";  //The input is the empty string.  
+		SimpleParser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		parser.parse();
+	}
+	
+	@Test
+	public void orTest() throws LexicalException, SyntaxException {
+		String input = "abc {image xy[23 , 44]; int x; x := 10;}";
+		SimpleParser parser = makeParser(input);
+		parser.parse();
+	}
 
 }
 	

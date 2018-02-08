@@ -13,26 +13,7 @@
 
 package cop5556sp18;
 
-import static cop5556sp18.Scanner.Kind.BOOLEAN_LITERAL;
-import static cop5556sp18.Scanner.Kind.DOT;
-import static cop5556sp18.Scanner.Kind.FLOAT_LITERAL;
-import static cop5556sp18.Scanner.Kind.IDENTIFIER;
-import static cop5556sp18.Scanner.Kind.INTEGER_LITERAL;
-import static cop5556sp18.Scanner.Kind.KW_boolean;
-import static cop5556sp18.Scanner.Kind.KW_float;
-import static cop5556sp18.Scanner.Kind.KW_int;
-import static cop5556sp18.Scanner.Kind.KW_sin;
-import static cop5556sp18.Scanner.Kind.KW_sleep;
-import static cop5556sp18.Scanner.Kind.LPAREN;
-import static cop5556sp18.Scanner.Kind.OP_ASSIGN;
-import static cop5556sp18.Scanner.Kind.OP_AT;
-import static cop5556sp18.Scanner.Kind.OP_COLON;
-import static cop5556sp18.Scanner.Kind.OP_DIV;
-import static cop5556sp18.Scanner.Kind.OP_GE;
-import static cop5556sp18.Scanner.Kind.OP_QUESTION;
-import static cop5556sp18.Scanner.Kind.OP_TIMES;
-import static cop5556sp18.Scanner.Kind.RPAREN;
-import static cop5556sp18.Scanner.Kind.SEMI;
+import static cop5556sp18.Scanner.Kind.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -682,6 +663,7 @@ public class ScannerTest {
 		checkNext(scanner, Kind.KW_blue, 10, 4, 1,11);
 		checkNextIsEOF(scanner);
 	}
+	
 }
 	
 
