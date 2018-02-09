@@ -121,6 +121,8 @@ public class SimpleParser {
 			statementSleep();
 
 		else
+			// this code is never reached since we are already checking for possible
+			// scenarios in block() method
 			throw new UnsupportedOperationException();
 	}
 
@@ -231,7 +233,13 @@ public class SimpleParser {
 		match(Kind.RSQUARE);
 	}
 
-	/* PixelExpression ::= IDENTIFIER PixelSelector */
+	/*
+	 * PixelExpression ::= IDENTIFIER PixelSelector we do not need this method
+	 * because pixelExpression() is possibly called only from the primary() method.
+	 * The identifier is already consumed before checking if the identifier belongs
+	 * to pixelExpression(). So once the identifier is consumed, it directly calls
+	 * the pixelSelector() instead of pixelExpression()
+	 */
 
 	public void pixelExpression() throws SyntaxException {
 		match(IDENTIFIER);
@@ -496,7 +504,8 @@ public class SimpleParser {
 			consume();
 			return tmp;
 		}
-		String message = "Expected EOL at " + t.line() + ":" + t.posInLine();
+		String message = "Expected " + kind.toString() + " at line " + t.line() + ": position " + t.posInLine()
+				+ " found " + t.kind.toString();
 		throw new SyntaxException(t, message); // TODO give a better error message!
 	}
 
