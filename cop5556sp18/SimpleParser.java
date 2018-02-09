@@ -72,11 +72,18 @@ public class SimpleParser {
 
 	}
 
+	/*
+	 * Declaration ::= Type IDENTIFIER | image IDENTIFIER [ Expression , Expression
+	 * ]
+	 */
+
 	public void declaration() throws SyntaxException {
 		// matching Type
 		if (isKind(KW_int) || isKind(KW_boolean) || isKind(KW_image) || isKind(KW_float) || isKind(KW_filename))
 			consume();
+
 		match(IDENTIFIER);
+
 		if (isKind(LSQUARE)) {
 			match(LSQUARE);
 			expression();
@@ -86,24 +93,38 @@ public class SimpleParser {
 		}
 	}
 
+	/*
+	 * Statement ::= StatementInput | StatementWrite | StatementAssignment |
+	 * StatementWhile | StatementIf | StatementShow | StatementSleep
+	 */
+
 	public void statement() throws SyntaxException {
 		if (isKind(KW_input))
 			statementInput();
+
 		else if (isKind(KW_write))
 			statementWrite();
+
 		else if (isKind(IDENTIFIER) || isKind(KW_red) || isKind(KW_green) || isKind(KW_blue) || isKind(KW_alpha))
 			statementAssignment();
+
 		else if (isKind(KW_while))
 			statementWhile();
+
 		else if (isKind(KW_if))
 			statementIf();
+
 		else if (isKind(KW_show))
 			statementShow();
+
 		else if (isKind(KW_sleep))
 			statementSleep();
+
 		else
 			throw new UnsupportedOperationException();
 	}
+
+	/* StatementInput ::= input IDENTIFIER from @ Expression */
 
 	public void statementInput() throws SyntaxException {
 		match(KW_input);
@@ -113,6 +134,8 @@ public class SimpleParser {
 		expression();
 	}
 
+	/* StatementWrite ::= write IDENTIFIER to IDENTIFIER */
+
 	public void statementWrite() throws SyntaxException {
 		match(KW_write);
 		match(IDENTIFIER);
@@ -120,12 +143,17 @@ public class SimpleParser {
 		match(IDENTIFIER);
 	}
 
+	/* StatementAssignment ::= LHS := Expression */
+
 	public void statementAssignment() throws SyntaxException {
 		if (isKind(IDENTIFIER) || isKind(KW_red) || isKind(KW_green) || isKind(KW_blue) || isKind(KW_alpha))
 			LHS();
+
 		match(OP_ASSIGN);
 		expression();
 	}
+
+	/* StatementWhile ::= while (Expression ) Block */
 
 	public void statementWhile() throws SyntaxException {
 		match(KW_while);
@@ -135,6 +163,8 @@ public class SimpleParser {
 		block();
 	}
 
+	/* StatementIf ::= if ( Expression ) Block */
+
 	public void statementIf() throws SyntaxException {
 		match(KW_if);
 		match(LPAREN);
@@ -143,10 +173,14 @@ public class SimpleParser {
 		block();
 	}
 
+	/* StatementShow ::= show Expression */
+
 	public void statementShow() throws SyntaxException {
 		match(KW_show);
 		expression();
 	}
+
+	/* StatementSleep ::= sleep Expression */
 
 	public void statementSleep() throws SyntaxException {
 		match(KW_sleep);
@@ -155,11 +189,18 @@ public class SimpleParser {
 
 	Kind[] firstColor = { KW_red, KW_green, KW_blue, KW_alpha };
 
+	/* Color ::= red | green | blue | alpha */
+
 	public void color() throws SyntaxException {
 		if (isKind(firstColor)) {
 			consume();
 		}
 	}
+
+	/*
+	 * LHS ::= IDENTIFIER | IDENTIFIER PixelSelector | Color ( IDENTIFIER
+	 * PixelSelector )
+	 */
 
 	public void LHS() throws SyntaxException {
 		if (isKind(IDENTIFIER) || isKind(firstColor)) {
@@ -168,6 +209,7 @@ public class SimpleParser {
 				if (isKind(LSQUARE)) {
 					pixelSelector();
 				}
+
 			} else if (isKind(firstColor)) {
 				consume();
 				match(LPAREN);
@@ -179,6 +221,8 @@ public class SimpleParser {
 
 	}
 
+	/* PixelSelector ::= [ Expression , Expression ] */
+
 	public void pixelSelector() throws SyntaxException {
 		match(Kind.LSQUARE);
 		expression();
@@ -187,10 +231,16 @@ public class SimpleParser {
 		match(Kind.RSQUARE);
 	}
 
+	/* PixelExpression ::= IDENTIFIER PixelSelector */
+
 	public void pixelExpression() throws SyntaxException {
 		match(IDENTIFIER);
 		pixelSelector();
 	}
+
+	/*
+	 * PixelConstructor ::= << Expression , Expression , Expression , Expression >>
+	 */
 
 	public void pixelConstructor() throws SyntaxException {
 		match(LPIXEL);
@@ -207,11 +257,21 @@ public class SimpleParser {
 	Kind[] funcName = { KW_sin, KW_cos, KW_atan, KW_abs, KW_log, KW_cart_x, KW_cart_y, KW_polar_a, KW_polar_r, KW_int,
 			KW_float, KW_width, KW_height, KW_red, KW_green, KW_blue, KW_alpha };
 
+	/*
+	 * FunctionName ::= sin | cos | atan | abs | log | cart_x | cart_y | polar_a |
+	 * polar_r int | float | width | height | Color
+	 */
+
 	public void functionName() throws SyntaxException {
 		if (isKind(funcName)) {
 			consume();
 		}
 	}
+
+	/*
+	 * FunctionApplication ::= FunctionName ( Expression ) | FunctionName [
+	 * Expression , Expression ]
+	 */
 
 	public void functionApplication() throws SyntaxException {
 		functionName();
@@ -220,6 +280,7 @@ public class SimpleParser {
 			match(LPAREN);
 			expression();
 			match(RPAREN);
+
 		} else if (isKind(LSQUARE)) {
 			match(LSQUARE);
 			expression();
@@ -232,6 +293,8 @@ public class SimpleParser {
 
 	Kind[] firstPredefinedName = { KW_Z, KW_default_height, KW_default_width };
 
+	/* PredefinedName ::= Z | default_height | default_width */
+
 	public void predefinedName() throws SyntaxException {
 		if (isKind(KW_Z) || isKind(KW_default_height) || isKind(KW_default_width)) {
 			consume();
@@ -240,115 +303,166 @@ public class SimpleParser {
 
 	Kind[] firstPrimary = { INTEGER_LITERAL, BOOLEAN_LITERAL, FLOAT_LITERAL, LPAREN, IDENTIFIER, LPIXEL };
 
+	/*
+	 * Primary ::= INTEGER_LITERAL | BOOLEAN_LITERAL | FLOAT_LITERAL | ( Expression
+	 * ) | FunctionApplication | IDENTIFIER | PixelExpression | PredefinedName |
+	 * PixelConstructor
+	 */
+
 	public void primary() throws SyntaxException {
 		if (isKind(firstPrimary) || isKind(funcName) || isKind(firstPredefinedName)) {
 			if (isKind(INTEGER_LITERAL)) {
 				consume();
-			} else if (isKind(Kind.BOOLEAN_LITERAL)) {
+
+			} else if (isKind(BOOLEAN_LITERAL)) {
 				consume();
+
 			} else if (isKind(FLOAT_LITERAL)) {
 				consume();
+
 			} else if (isKind(LPAREN)) {
 				match(LPAREN);
 				expression();
 				match(RPAREN);
+
 			} else if (isKind(funcName)) {
 				functionApplication();
+
 			} else if (isKind(IDENTIFIER)) {
 				consume();
+
 				if (isKind(LSQUARE)) {
-					pixelExpression();
+					pixelSelector();
 				}
+
 			} else if (isKind(firstPredefinedName)) {
 				consume();
+
 			} else if (isKind(LPIXEL)) {
 				pixelConstructor();
 			}
 		}
 	}
 
+	/* UnaryExpressionNotPlusMinus ::= ! UnaryExpression | Primary */
+
 	public void unaryExpressionNotPlusMinus() throws SyntaxException {
 		if (isKind(OP_EXCLAMATION) || isKind(firstPrimary) || isKind(funcName) || isKind(firstPredefinedName)) {
 			if (isKind(OP_EXCLAMATION)) {
 				consume();
 				unaryExpression();
+
 			} else {
 				primary();
 			}
 		}
 	}
 
+	/*
+	 * UnaryExpression ::= + UnaryExpression | - UnaryExpression |
+	 * UnaryExpressionNotPlusMinus
+	 */
+
 	public void unaryExpression() throws SyntaxException {
 		if (isKind(OP_PLUS) || isKind(OP_MINUS) || isKind(OP_EXCLAMATION) || isKind(firstPrimary) || isKind(funcName)
 				|| isKind(firstPredefinedName)) {
+
 			if (isKind(OP_PLUS)) {
 				unaryExpression();
+
 			} else if (isKind(OP_MINUS)) {
 				unaryExpression();
+
 			} else {
 				unaryExpressionNotPlusMinus();
 			}
 		}
 	}
 
+	/* PowerExpression := UnaryExpression (** PowerExpression | ε) */
+
 	public void powerExpression() throws SyntaxException {
 		unaryExpression();
+
 		if (isKind(OP_POWER)) {
 			consume();
 			powerExpression();
 		}
 	}
 
+	/* MultExpression := PowerExpression ( ( * | / | % ) PowerExpression ) **/
+
 	public void multExpression() throws SyntaxException {
 		powerExpression();
+
 		while (isKind(OP_TIMES) || isKind(OP_DIV) || isKind(OP_MOD)) {
 			consume();
 			powerExpression();
 		}
 	}
 
+	/* AddExpression ::= MultExpression ( ( + | - ) MultExpression ) **/
+
 	public void addExpression() throws SyntaxException {
 		multExpression();
+
 		while (isKind(OP_PLUS) || isKind(OP_MINUS)) {
 			consume();
 			multExpression();
 		}
 	}
 
+	/* RelExpression ::= AddExpression ( (< | > | <= | >= ) AddExpression) **/
+
 	public void relExpression() throws SyntaxException {
 		addExpression();
+
 		while (isKind(OP_LT) || isKind(OP_GT) || isKind(OP_LE) || isKind(OP_GE)) {
 			consume();
 			addExpression();
 		}
 	}
 
+	/* EqExpression ::= RelExpression ( (== | != ) RelExpression ) **/
+
 	public void eqExpression() throws SyntaxException {
 		relExpression();
+
 		while (isKind(OP_EQ) || isKind(OP_NEQ)) {
 			consume();
 			relExpression();
 		}
 	}
 
+	/* AndExpression ::= EqExpression ( & EqExpression ) **/
+
 	public void andExpression() throws SyntaxException {
 		eqExpression();
+
 		while (isKind(OP_AND)) {
 			consume();
 			eqExpression();
 		}
 	}
 
+	/* OrExpression ::= AndExpression ( | AndExpression ) **/
+
 	public void orExpression() throws SyntaxException {
 		andExpression();
+
 		while (isKind(OP_OR)) {
 			consume();
 			andExpression();
 		}
 	}
 
+	/*
+	 * Expression ::= OrExpression ? Expression : Expression | OrExpression
+	 */
+
 	public void expression() throws SyntaxException {
 		orExpression();
+
 		if (isKind(OP_QUESTION)) {
 			consume();
 			expression();
@@ -409,7 +523,8 @@ public class SimpleParser {
 		if (isKind(EOF)) {
 			return t;
 		}
-		throw new SyntaxException(t, "Syntax Error"); // TODO give a better error message!
+		String message = "Expected EOL at " + t.line() + ":" + t.posInLine();
+		throw new SyntaxException(t, message); // TODO give a better error message!
 	}
 
 }
