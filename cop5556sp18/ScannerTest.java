@@ -664,21 +664,6 @@ public class ScannerTest {
 		checkNextIsEOF(scanner);
 	}
 	
-	
-	@Test
-	public void testSleep11() throws LexicalException {
-		String input = "abc{input abc from @ 456; write abc to a758; red (a567 [345,456]) := 85467; while(true) {if(false){show testcases;sleep 345.;};};red (abc [345,876.54]):= (5678.89 ? 345:false); "
-				+ "	show  <<!abc23[92,ty789[345,true]],+default_height,cart_y(45)*log(.32).123 + cart_x(48)*sin(45).456 >= 35 == 45 & 32.96 ? ab2:true,89>>;}"
-				;
-		Scanner scanner = new Scanner(input).scan();
-		show(input);
-		show(scanner);
-		/*checkNext(scanner, FLOAT_LITERAL, 0, 2, 1, 1);
-		checkNext(scanner, IDENTIFIER, 2, 3, 1, 3);
-		checkNext(scanner, OP_DIV, 5, 1, 1, 6);
-		checkNext(scanner, KW_sleep, 6, 5, 1, 7);
-		checkNextIsEOF(scanner);*/
-	}
 }
 	
 
