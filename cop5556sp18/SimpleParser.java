@@ -376,9 +376,11 @@ public class SimpleParser {
 				|| isKind(firstPredefinedName)) {
 
 			if (isKind(OP_PLUS)) {
+				consume();
 				unaryExpression();
 
 			} else if (isKind(OP_MINUS)) {
+				consume();
 				unaryExpression();
 
 			} else {
