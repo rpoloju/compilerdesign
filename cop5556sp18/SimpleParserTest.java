@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import cop5556sp18.Scanner.LexicalException;
-import cop5556sp18.SimpleParser.SyntaxException;
+import cop5556sp18.Parser.SyntaxException;
 
 public class SimpleParserTest {
 
@@ -36,11 +36,11 @@ public class SimpleParserTest {
 	}
 
 	// creates and returns a parser for the given input.
-	private SimpleParser makeParser(String input) throws LexicalException {
+	private Parser makeParser(String input) throws LexicalException {
 		// show(input); // Display the input
 		Scanner scanner = new Scanner(input).scan(); // Create a Scanner and initialize it
 		// show(scanner); // Display the Scanner
-		SimpleParser parser = new SimpleParser(scanner);
+		Parser parser = new Parser(scanner);
 		return parser;
 	}
 
@@ -55,7 +55,7 @@ public class SimpleParserTest {
 	@Test
 	public void testEmpty1() throws LexicalException, SyntaxException {
 		String input = ""; // The input is the empty string.
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		thrown.expect(SyntaxException.class);
 		parser.parse();
 	}
@@ -69,7 +69,7 @@ public class SimpleParserTest {
 	@Test
 	public void testSmallest1() throws LexicalException, SyntaxException {
 		String input = "b{}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		parser.parse();
 	}
 
@@ -79,14 +79,14 @@ public class SimpleParserTest {
 	@Test
 	public void testDec011() throws LexicalException, SyntaxException {
 		String input = "b{int c;}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		parser.parse();
 	}
 
 	@Test
 	public void test11() throws LexicalException, SyntaxException {
 		String input = "b*"; // The input is the empty string.
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		thrown.expect(SyntaxException.class);
 		parser.parse();
 	}
@@ -94,14 +94,14 @@ public class SimpleParserTest {
 	@Test
 	public void orTest() throws LexicalException, SyntaxException {
 		String input = "abc {image xy[23 , 44]; int x; x := 10;}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		parser.parse();
 	}
 
 	@Test
 	public void testError1() throws LexicalException, SyntaxException {
 		String input = "block1{while{}}"; // The input is the empty string.
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		thrown.expect(SyntaxException.class);
 		try {
 			parser.parse();
@@ -115,14 +115,14 @@ public class SimpleParserTest {
 	@Test
 	public void test01() throws LexicalException, SyntaxException {
 		String input = "xyz{image xy[sin(80),cos(atan(abs(cart_x(width(20)))))];}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		parser.parse();
 	}
 
 	@Test
 	public void test02() throws LexicalException, SyntaxException {
 		String input = "abc{int ab;ab := (20 | 30 & 40 ** 50;}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		thrown.expect(SyntaxException.class);
 		try {
 			parser.parse();
@@ -135,8 +135,229 @@ public class SimpleParserTest {
 	@Test
 	public void test03() throws LexicalException, SyntaxException {
 		String input = "abc{int ab;ab := (20 | 30 & 40 ** 50);}";
-		SimpleParser parser = makeParser(input);
+		Parser parser = makeParser(input);
 		parser.parse();
+	}
+
+	@Test
+	public void test04() throws LexicalException, SyntaxException {
+		String input = "prog{if(a & ){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test05() throws LexicalException, SyntaxException {
+		String input = "prog{if(a!=){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test06() throws LexicalException, SyntaxException {
+		String input = "prog{image var [,]; }";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test07() throws LexicalException, SyntaxException {
+		String input = "prog{show ;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test08() throws LexicalException, SyntaxException {
+		String input = "prog{if(a | b |){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test09() throws LexicalException, SyntaxException {
+		String input = "prog{input var from @; }";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test10() throws LexicalException, SyntaxException {
+		String input = "prog{sleep ;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test12() throws LexicalException, SyntaxException {
+		String input = "prog{var := ;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test13() throws LexicalException, SyntaxException {
+		String input = "prog{while (){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test14() throws LexicalException, SyntaxException {
+		String input = "prog{int a;a := (2+3)==(3+2)?1:;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test15() throws LexicalException, SyntaxException {
+		String input = "prog{int a;a := (2+3)==(3+2)?:5;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test16() throws LexicalException, SyntaxException {
+		String input = "prog{ var [,] := 25;}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test17() throws LexicalException, SyntaxException {
+		String input = "prog{if(a | b || c){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test18() throws LexicalException, SyntaxException {
+		String input = "prog{if(a==){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test19() throws LexicalException, SyntaxException {
+		String input = "prog{if (){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test20() throws LexicalException, SyntaxException {
+		String input = "prog{if(a && b){};}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test21() throws LexicalException, SyntaxException {
+		String input = "prog{show int();}";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			parser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw (e);
+		}
 	}
 
 }

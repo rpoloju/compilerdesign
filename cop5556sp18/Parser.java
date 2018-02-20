@@ -16,7 +16,7 @@ import cop5556sp18.Scanner.Token;
 import cop5556sp18.Scanner.Kind;
 import static cop5556sp18.Scanner.Kind.*;
 
-public class SimpleParser {
+public class Parser {
 
 	@SuppressWarnings("serial")
 	public static class SyntaxException extends Exception {
@@ -32,7 +32,7 @@ public class SimpleParser {
 	Scanner scanner;
 	Token t;
 
-	SimpleParser(Scanner scanner) {
+	Parser(Scanner scanner) {
 		this.scanner = scanner;
 		t = scanner.nextToken();
 	}
@@ -349,6 +349,8 @@ public class SimpleParser {
 			} else if (isKind(LPIXEL)) {
 				pixelConstructor();
 			}
+		} else {
+			throw new SyntaxException(t, "Syntax Error");
 		}
 	}
 
@@ -386,6 +388,10 @@ public class SimpleParser {
 			} else {
 				unaryExpressionNotPlusMinus();
 			}
+		} else {
+			String message = "Expected expression at line " + t.line() + ": position " + t.posInLine() + " found "
+					+ t.kind.toString();
+			throw new SyntaxException(t, message);
 		}
 	}
 
