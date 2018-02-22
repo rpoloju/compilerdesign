@@ -13,8 +13,12 @@ package cop5556sp18;
  */
 
 import cop5556sp18.Scanner.Token;
+import cop5556sp18.AST.*;
 import cop5556sp18.Scanner.Kind;
 import static cop5556sp18.Scanner.Kind.*;
+
+import java.util.List;
+import java.util.ArrayList;
 
 public class Parser {
 
@@ -37,17 +41,28 @@ public class Parser {
 		t = scanner.nextToken();
 	}
 
-	public void parse() throws SyntaxException {
-		program();
+	public Program parse() throws SyntaxException {
+		Program p = program();
 		matchEOF();
+		return p;
 	}
 
 	/*
 	 * Program ::= Identifier Block
 	 */
-	public void program() throws SyntaxException {
-		match(IDENTIFIER);
-		block();
+	public Program program() throws SyntaxException {
+		Program prog = null;
+		Token firstToken = t;
+		Token identifier = null;
+
+		if (t.kind == Kind.IDENTIFIER) {
+			identifier = t;
+			consume();
+		}
+
+		Block b = block();
+		prog = new Program(firstToken, identifier, b);
+		return prog;
 	}
 
 	/*
@@ -58,18 +73,26 @@ public class Parser {
 	Kind[] firstStatement = { KW_input, KW_write, IDENTIFIER, KW_red, KW_blue, KW_green, KW_alpha, KW_while, KW_if,
 			KW_show, KW_sleep };
 
-	public void block() throws SyntaxException {
+	public Block block() throws SyntaxException {
+		Block b = null;
+		Declaration d = null;
+		Statement s = null;
+		List<ASTNode> decsOrStatements = new ArrayList<>();
+		Token firstToken = t;
 		match(LBRACE);
 		while (isKind(firstDec) | isKind(firstStatement)) {
 			if (isKind(firstDec)) {
-				declaration();
+				d = declaration();
+				decsOrStatements.add(d);
 			} else if (isKind(firstStatement)) {
-				statement();
+				s = statement();
+				decsOrStatements.add(s);
 			}
 			match(SEMI);
 		}
 		match(RBRACE);
-
+		b = new Block(firstToken, decsOrStatements);
+		return b;
 	}
 
 	/*
@@ -77,20 +100,30 @@ public class Parser {
 	 * ]
 	 */
 
-	public void declaration() throws SyntaxException {
+	public Declaration declaration() throws SyntaxException {
 		// matching Type
+		Declaration d = null;
+		Expression width = null, height = null;
+		Token firstToken = t;
+
 		if (isKind(KW_int) || isKind(KW_boolean) || isKind(KW_image) || isKind(KW_float) || isKind(KW_filename))
 			consume();
 
-		match(IDENTIFIER);
+		// match(IDENTIFIER);
+		Token ident = t;
+		if (ident.kind == Kind.IDENTIFIER) {
+			consume();
+		}
 
 		if (isKind(LSQUARE)) {
 			match(LSQUARE);
-			expression();
+			width = expression();
 			match(COMMA);
-			expression();
+			width = expression();
 			match(RSQUARE);
 		}
+		d = new Declaration(firstToken, firstToken, ident, width, height);
+		return d;
 	}
 
 	/*
@@ -98,95 +131,171 @@ public class Parser {
 	 * StatementWhile | StatementIf | StatementShow | StatementSleep
 	 */
 
-	public void statement() throws SyntaxException {
+	public Statement statement() throws SyntaxException {
+		
+		Statement stmt = null;
+		Token firstToken = t;
+		
 		if (isKind(KW_input))
-			statementInput();
+			stmt = statementInput();
 
 		else if (isKind(KW_write))
-			statementWrite();
+			stmt = statementWrite();
 
 		else if (isKind(IDENTIFIER) || isKind(KW_red) || isKind(KW_green) || isKind(KW_blue) || isKind(KW_alpha))
-			statementAssignment();
+			stmt = statementAssignment();
 
 		else if (isKind(KW_while))
-			statementWhile();
+			stmt = statementWhile();
 
 		else if (isKind(KW_if))
-			statementIf();
+			stmt = statementIf();
 
 		else if (isKind(KW_show))
-			statementShow();
+			stmt = statementShow();
 
 		else if (isKind(KW_sleep))
-			statementSleep();
+			stmt = statementSleep();
 
 		else
 			// this code is never reached since we are already checking for possible
 			// scenarios in block() method
 			throw new UnsupportedOperationException();
+		return stmt;
 	}
 
 	/* StatementInput ::= input IDENTIFIER from @ Expression */
 
-	public void statementInput() throws SyntaxException {
+	public StatementInput statementInput() throws SyntaxException {
+		Token firstToken = t;
+		Token identifier;
+		StatementInput stmtInput = null;
+		Expression exp = null;
+		
 		match(KW_input);
+		
+		identifier = t;
 		match(IDENTIFIER);
+		
 		match(KW_from);
 		match(OP_AT);
-		expression();
+		
+		exp = expression();
+		
+		stmtInput = new StatementInput(firstToken, identifier, exp);
+		return stmtInput;
 	}
 
 	/* StatementWrite ::= write IDENTIFIER to IDENTIFIER */
 
-	public void statementWrite() throws SyntaxException {
+	public StatementWrite statementWrite() throws SyntaxException {
+		Token firstToken = t;
+		StatementWrite stmtWrite = null;
+		Token identifier1, identifier2;
+		
 		match(KW_write);
+		
+		identifier1 = t;
 		match(IDENTIFIER);
+		
 		match(KW_to);
+		
+		identifier2 = t;
 		match(IDENTIFIER);
+
+		stmtWrite = new StatementWrite(firstToken, identifier1, identifier2);
+		return stmtWrite;
 	}
 
 	/* StatementAssignment ::= LHS := Expression */
 
-	public void statementAssignment() throws SyntaxException {
+	public StatementAssign statementAssignment() throws SyntaxException {
+		Token firstToken = t;
+		StatementAssign stmtAssignment = null;
+		Expression exp = null;
+		LHS lhs = null;
+
 		if (isKind(IDENTIFIER) || isKind(KW_red) || isKind(KW_green) || isKind(KW_blue) || isKind(KW_alpha))
-			LHS();
+			lhs = LHS();
 
 		match(OP_ASSIGN);
-		expression();
+
+		exp = expression();
+
+		stmtAssignment = new StatementAssign(firstToken, lhs, exp);
+		return stmtAssignment;
 	}
 
 	/* StatementWhile ::= while (Expression ) Block */
 
-	public void statementWhile() throws SyntaxException {
+	public StatementWhile statementWhile() throws SyntaxException {
+		Token firstToken = t;
+		StatementWhile stmtWhile = null;
+		Expression exp = null;
+		Block blk = null;
+
 		match(KW_while);
 		match(LPAREN);
-		expression();
+
+		exp = expression();
+
 		match(RPAREN);
-		block();
+
+		blk = block();
+
+		stmtWhile = new StatementWhile(firstToken, exp, blk);
+		return stmtWhile;
 	}
 
 	/* StatementIf ::= if ( Expression ) Block */
 
-	public void statementIf() throws SyntaxException {
+	public StatementIf statementIf() throws SyntaxException {
+		Token firstToken = t;
+		StatementIf stmtIf = null;
+		Expression exp = null;
+		Block blk = null;
+		
 		match(KW_if);
-		match(LPAREN);
-		expression();
+		match(LPAREN); 
+		
+		exp = expression();
+		
 		match(RPAREN);
-		block();
+		
+		blk = block();
+		
+		stmtIf = new StatementIf(firstToken, exp, blk);
+		return stmtIf;
 	}
 
 	/* StatementShow ::= show Expression */
 
-	public void statementShow() throws SyntaxException {
+	public StatementShow statementShow() throws SyntaxException {
+		Token firstToken = t;
+		StatementShow stmtShow = null;
+		Expression exp = null;
+
 		match(KW_show);
-		expression();
+
+		exp = expression();
+
+		stmtShow = new StatementShow(firstToken, exp);
+		return stmtShow;
+
 	}
 
 	/* StatementSleep ::= sleep Expression */
 
-	public void statementSleep() throws SyntaxException {
+	public StatementSleep statementSleep() throws SyntaxException {
+		Token firstToken = t;
+		StatementSleep stmtSleep = null;
+		Expression exp = null;
+
 		match(KW_sleep);
-		expression();
+		exp = expression();
+
+		stmtSleep = new StatementSleep(firstToken, exp);
+		return stmtSleep;
 	}
 
 	Kind[] firstColor = { KW_red, KW_green, KW_blue, KW_alpha };
@@ -204,12 +313,18 @@ public class Parser {
 	 * PixelSelector )
 	 */
 
-	public void LHS() throws SyntaxException {
+	public LHS LHS() throws SyntaxException {
+		LHS lhs = null;
+		Token firstToken = t;
+		
 		if (isKind(IDENTIFIER) || isKind(firstColor)) {
 			if (isKind(IDENTIFIER)) {
+				Token identifier = t;
 				consume();
 				if (isKind(LSQUARE)) {
 					pixelSelector();
+				} else {
+					return new LHSIdent(firstToken, identifier);
 				}
 
 			} else if (isKind(firstColor)) {
@@ -220,6 +335,9 @@ public class Parser {
 				match(RPAREN);
 			}
 		}
+		
+		lhs = new LHS(firstToken);
+		return lhs;
 
 	}
 
