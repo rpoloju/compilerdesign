@@ -119,7 +119,7 @@ public class Parser {
 			match(LSQUARE);
 			width = expression();
 			match(COMMA);
-			width = expression();
+			height = expression();
 			match(RSQUARE);
 		}
 		d = new Declaration(firstToken, firstToken, ident, width, height);
