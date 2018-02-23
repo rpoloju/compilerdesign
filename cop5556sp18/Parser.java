@@ -132,10 +132,9 @@ public class Parser {
 	 */
 
 	public Statement statement() throws SyntaxException {
-		
+
 		Statement stmt = null;
-		Token firstToken = t;
-		
+
 		if (isKind(KW_input))
 			stmt = statementInput();
 
@@ -171,17 +170,17 @@ public class Parser {
 		Token identifier;
 		StatementInput stmtInput = null;
 		Expression exp = null;
-		
+
 		match(KW_input);
-		
+
 		identifier = t;
 		match(IDENTIFIER);
-		
+
 		match(KW_from);
 		match(OP_AT);
-		
+
 		exp = expression();
-		
+
 		stmtInput = new StatementInput(firstToken, identifier, exp);
 		return stmtInput;
 	}
@@ -192,14 +191,14 @@ public class Parser {
 		Token firstToken = t;
 		StatementWrite stmtWrite = null;
 		Token identifier1, identifier2;
-		
+
 		match(KW_write);
-		
+
 		identifier1 = t;
 		match(IDENTIFIER);
-		
+
 		match(KW_to);
-		
+
 		identifier2 = t;
 		match(IDENTIFIER);
 
@@ -254,16 +253,16 @@ public class Parser {
 		StatementIf stmtIf = null;
 		Expression exp = null;
 		Block blk = null;
-		
+
 		match(KW_if);
-		match(LPAREN); 
-		
+		match(LPAREN);
+
 		exp = expression();
-		
+
 		match(RPAREN);
-		
+
 		blk = block();
-		
+
 		stmtIf = new StatementIf(firstToken, exp, blk);
 		return stmtIf;
 	}
@@ -316,39 +315,50 @@ public class Parser {
 	public LHS LHS() throws SyntaxException {
 		LHS lhs = null;
 		Token firstToken = t;
-		
+		PixelSelector ps = null;
+
 		if (isKind(IDENTIFIER) || isKind(firstColor)) {
 			if (isKind(IDENTIFIER)) {
 				Token identifier = t;
 				consume();
 				if (isKind(LSQUARE)) {
-					pixelSelector();
+					ps = pixelSelector();
+					return new LHSPixel(firstToken, identifier, ps);
 				} else {
 					return new LHSIdent(firstToken, identifier);
 				}
 
 			} else if (isKind(firstColor)) {
+				Token color = t;
 				consume();
 				match(LPAREN);
+				Token identifier = t;
 				match(IDENTIFIER);
-				pixelSelector();
+				ps = pixelSelector();
 				match(RPAREN);
+				return new LHSSample(firstToken, identifier, ps, color);
 			}
 		}
-		
-		lhs = new LHS(firstToken);
+
 		return lhs;
 
 	}
 
 	/* PixelSelector ::= [ Expression , Expression ] */
 
-	public void pixelSelector() throws SyntaxException {
+	public PixelSelector pixelSelector() throws SyntaxException {
+		Token firstToken = t;
+		PixelSelector ps = null;
+		Expression e1 = null, e2 = null;
 		match(Kind.LSQUARE);
-		expression();
+		e1 = expression();
 		match(Kind.COMMA);
-		expression();
+		e2 = expression();
 		match(Kind.RSQUARE);
+
+		ps = new PixelSelector(firstToken, e1, e2);
+		return ps;
+
 	}
 
 	/*
@@ -368,16 +378,22 @@ public class Parser {
 	 * PixelConstructor ::= << Expression , Expression , Expression , Expression >>
 	 */
 
-	public void pixelConstructor() throws SyntaxException {
+	public ExpressionPixelConstructor pixelConstructor() throws SyntaxException {
+		Token firstToken = t;
+		ExpressionPixelConstructor epc = null;
+		Expression e1 = null, e2 = null, e3 = null, e4 = null;
 		match(LPIXEL);
-		expression();
+		e1 = expression();
 		match(COMMA);
-		expression();
+		e2 = expression();
 		match(COMMA);
-		expression();
+		e3 = expression();
 		match(COMMA);
-		expression();
+		e4 = expression();
 		match(RPIXEL);
+
+		epc = new ExpressionPixelConstructor(firstToken, e1, e2, e3, e4);
+		return epc;
 	}
 
 	Kind[] funcName = { KW_sin, KW_cos, KW_atan, KW_abs, KW_log, KW_cart_x, KW_cart_y, KW_polar_a, KW_polar_r, KW_int,
@@ -388,10 +404,12 @@ public class Parser {
 	 * polar_r int | float | width | height | Color
 	 */
 
-	public void functionName() throws SyntaxException {
+	public Token functionName() throws SyntaxException {
+		Token token = t;
 		if (isKind(funcName)) {
 			consume();
 		}
+		return token;
 	}
 
 	/*
@@ -399,21 +417,27 @@ public class Parser {
 	 * Expression , Expression ]
 	 */
 
-	public void functionApplication() throws SyntaxException {
-		functionName();
+	public Expression functionApplication() throws SyntaxException {
+		Token firstToken = t;
+		Token funcName = t;
+		funcName = functionName();
 
 		if (isKind(LPAREN)) {
 			match(LPAREN);
-			expression();
+			Expression exp = expression();
 			match(RPAREN);
+			return new ExpressionFunctionAppWithExpressionArg(firstToken, funcName, exp);
 
 		} else if (isKind(LSQUARE)) {
 			match(LSQUARE);
-			expression();
+			Expression exp1 = expression();
 			match(COMMA);
-			expression();
+			Expression exp2 = expression();
 			match(RSQUARE);
+			return new ExpressionFunctionAppWithPixel(firstToken, funcName, exp1, exp2);
 		}
+
+		return null;
 
 	}
 
@@ -421,10 +445,14 @@ public class Parser {
 
 	/* PredefinedName ::= Z | default_height | default_width */
 
-	public void predefinedName() throws SyntaxException {
+	public ExpressionPredefinedName predefinedName() throws SyntaxException {
+		Token firstToken = t;
 		if (isKind(KW_Z) || isKind(KW_default_height) || isKind(KW_default_width)) {
+			Token predefinedName = t;
 			consume();
+			return new ExpressionPredefinedName(firstToken, predefinedName);
 		}
+		return null;
 	}
 
 	Kind[] firstPrimary = { INTEGER_LITERAL, BOOLEAN_LITERAL, FLOAT_LITERAL, LPAREN, IDENTIFIER, LPIXEL };
@@ -435,55 +463,77 @@ public class Parser {
 	 * PixelConstructor
 	 */
 
-	public void primary() throws SyntaxException {
+	public Expression primary() throws SyntaxException {
+		Token firstToken = t;
 		if (isKind(firstPrimary) || isKind(funcName) || isKind(firstPredefinedName)) {
 			if (isKind(INTEGER_LITERAL)) {
+				Token intVal = t;
 				consume();
+				return new ExpressionIntegerLiteral(firstToken, intVal);
 
 			} else if (isKind(BOOLEAN_LITERAL)) {
+				Token boolVal = t;
 				consume();
+				return new ExpressionBooleanLiteral(firstToken, boolVal);
 
 			} else if (isKind(FLOAT_LITERAL)) {
+				Token floatVal = t;
 				consume();
+				return new ExpressionFloatLiteral(firstToken, floatVal);
 
 			} else if (isKind(LPAREN)) {
 				match(LPAREN);
-				expression();
+				Expression e0 = expression();
 				match(RPAREN);
+				return e0;
 
 			} else if (isKind(funcName)) {
-				functionApplication();
+				Expression e0 = functionApplication();
+				return e0;
 
 			} else if (isKind(IDENTIFIER)) {
+				Token identifier = t;
 				consume();
 
 				if (isKind(LSQUARE)) {
-					pixelSelector();
+					PixelSelector ps = pixelSelector();
+					return new ExpressionPixel(firstToken, identifier, ps);
+				} else {
+					return new ExpressionIdent(firstToken, identifier);
 				}
 
 			} else if (isKind(firstPredefinedName)) {
+				Token pname = t;
 				consume();
+				return new ExpressionPredefinedName(firstToken, pname);
 
 			} else if (isKind(LPIXEL)) {
-				pixelConstructor();
+				ExpressionPixelConstructor epc = pixelConstructor();
+				return epc;
 			}
 		} else {
 			throw new SyntaxException(t, "Syntax Error");
 		}
+		return null;
 	}
 
 	/* UnaryExpressionNotPlusMinus ::= ! UnaryExpression | Primary */
 
-	public void unaryExpressionNotPlusMinus() throws SyntaxException {
+	public Expression unaryExpressionNotPlusMinus() throws SyntaxException {
+		Token firstToken = t;
 		if (isKind(OP_EXCLAMATION) || isKind(firstPrimary) || isKind(funcName) || isKind(firstPredefinedName)) {
 			if (isKind(OP_EXCLAMATION)) {
+				Token op = t;
 				consume();
-				unaryExpression();
+				Expression eu = unaryExpression();
+				return new ExpressionUnary(firstToken, op, eu);
 
 			} else {
-				primary();
+				Expression prim = primary();
+				return prim;
 			}
 		}
+		return null;
 	}
 
 	/*
@@ -491,20 +541,25 @@ public class Parser {
 	 * UnaryExpressionNotPlusMinus
 	 */
 
-	public void unaryExpression() throws SyntaxException {
+	public Expression unaryExpression() throws SyntaxException {
+		Token firstToken = t;
 		if (isKind(OP_PLUS) || isKind(OP_MINUS) || isKind(OP_EXCLAMATION) || isKind(firstPrimary) || isKind(funcName)
 				|| isKind(firstPredefinedName)) {
+			Token op = t;
 
 			if (isKind(OP_PLUS)) {
 				consume();
-				unaryExpression();
+				Expression eu = unaryExpression();
+				return new ExpressionUnary(firstToken, op, eu);
 
 			} else if (isKind(OP_MINUS)) {
 				consume();
-				unaryExpression();
+				Expression eu = unaryExpression();
+				return new ExpressionUnary(firstToken, op, eu);
 
 			} else {
-				unaryExpressionNotPlusMinus();
+				Expression eunpm = unaryExpressionNotPlusMinus();
+				return eunpm;
 			}
 		} else {
 			String message = "Expected expression at line " + t.line() + ": position " + t.posInLine() + " found "
@@ -515,94 +570,154 @@ public class Parser {
 
 	/* PowerExpression := UnaryExpression (** PowerExpression | ε) */
 
-	public void powerExpression() throws SyntaxException {
-		unaryExpression();
+	public Expression powerExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = unaryExpression();
 
 		if (isKind(OP_POWER)) {
+			op = t;
 			consume();
-			powerExpression();
+			e1 = powerExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* MultExpression := PowerExpression ( ( * | / | % ) PowerExpression ) **/
 
-	public void multExpression() throws SyntaxException {
-		powerExpression();
+	public Expression multExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = powerExpression();
 
 		while (isKind(OP_TIMES) || isKind(OP_DIV) || isKind(OP_MOD)) {
+			op = t;
 			consume();
-			powerExpression();
+			e1 = powerExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* AddExpression ::= MultExpression ( ( + | - ) MultExpression ) **/
 
-	public void addExpression() throws SyntaxException {
-		multExpression();
+	public Expression addExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = multExpression();
 
 		while (isKind(OP_PLUS) || isKind(OP_MINUS)) {
+			op = t;
 			consume();
-			multExpression();
+			e1 = multExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* RelExpression ::= AddExpression ( (< | > | <= | >= ) AddExpression) **/
 
-	public void relExpression() throws SyntaxException {
-		addExpression();
+	public Expression relExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = addExpression();
 
 		while (isKind(OP_LT) || isKind(OP_GT) || isKind(OP_LE) || isKind(OP_GE)) {
+			op = t;
 			consume();
-			addExpression();
+			e1 = addExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* EqExpression ::= RelExpression ( (== | != ) RelExpression ) **/
 
-	public void eqExpression() throws SyntaxException {
-		relExpression();
+	public Expression eqExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = relExpression();
 
 		while (isKind(OP_EQ) || isKind(OP_NEQ)) {
+			op = t;
 			consume();
-			relExpression();
+			e1 = relExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* AndExpression ::= EqExpression ( & EqExpression ) **/
 
-	public void andExpression() throws SyntaxException {
-		eqExpression();
+	public Expression andExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = eqExpression();
 
 		while (isKind(OP_AND)) {
+			op = t;
 			consume();
-			eqExpression();
+			e1 = eqExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/* OrExpression ::= AndExpression ( | AndExpression ) **/
 
-	public void orExpression() throws SyntaxException {
-		andExpression();
+	public Expression orExpression() throws SyntaxException {
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
+		Expression e1 = null;
+
+		e0 = andExpression();
 
 		while (isKind(OP_OR)) {
+			op = t;
 			consume();
-			andExpression();
+			e1 = andExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 	/*
 	 * Expression ::= OrExpression ? Expression : Expression | OrExpression
 	 */
 
-	public void expression() throws SyntaxException {
-		orExpression();
+	public Expression expression() throws SyntaxException {
+		Token firstToken = t;
+		Expression e0 = null, e1 = null, e2 = null;
+		e0 = orExpression();
 
 		if (isKind(OP_QUESTION)) {
 			consume();
-			expression();
+			e1 = expression();
 			match(OP_COLON);
-			expression();
+			e2 = expression();
+			return new ExpressionConditional(firstToken, e0, e1, e2);
 		}
+		return e0;
 	}
 
 	protected boolean isKind(Kind kind) {
