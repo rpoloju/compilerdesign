@@ -53,12 +53,12 @@ public class Parser {
 	public Program program() throws SyntaxException {
 		Program prog = null;
 		Token firstToken = t;
-		Token identifier = null;
+		Token identifier = t;
 
-		if (t.kind == Kind.IDENTIFIER) {
-			identifier = t;
-			consume();
-		}
+		/*
+		 * if (t.kind == Kind.IDENTIFIER) { identifier = t; consume(); }
+		 */
+		match(Kind.IDENTIFIER);
 
 		Block b = block();
 		prog = new Program(firstToken, identifier, b);
@@ -313,7 +313,6 @@ public class Parser {
 	 */
 
 	public LHS LHS() throws SyntaxException {
-		LHS lhs = null;
 		Token firstToken = t;
 		PixelSelector ps = null;
 
@@ -337,10 +336,12 @@ public class Parser {
 				ps = pixelSelector();
 				match(RPAREN);
 				return new LHSSample(firstToken, identifier, ps, color);
+			} else {
+				throw new SyntaxException(t, "Syntax Error");
 			}
+		} else {
+			throw new SyntaxException(t, "Syntax Error");
 		}
-
-		return lhs;
 
 	}
 
@@ -435,9 +436,10 @@ public class Parser {
 			Expression exp2 = expression();
 			match(RSQUARE);
 			return new ExpressionFunctionAppWithPixel(firstToken, funcName, exp1, exp2);
+		} else {
+			throw new SyntaxException(t,
+					"Expected ( or [ at " + t.line() + ": position " + t.posInLine() + " found " + t.kind.toString());
 		}
-
-		return null;
 
 	}
 
@@ -451,8 +453,10 @@ public class Parser {
 			Token predefinedName = t;
 			consume();
 			return new ExpressionPredefinedName(firstToken, predefinedName);
+		} else {
+			throw new SyntaxException(t, "Expected ExpressionPredefinedName at " + t.line() + ": position "
+					+ t.posInLine() + " found " + t.kind.toString());
 		}
-		return null;
 	}
 
 	Kind[] firstPrimary = { INTEGER_LITERAL, BOOLEAN_LITERAL, FLOAT_LITERAL, LPAREN, IDENTIFIER, LPIXEL };
@@ -532,8 +536,9 @@ public class Parser {
 				Expression prim = primary();
 				return prim;
 			}
+		} else {
+			throw new SyntaxException(t, "Syntax Error");
 		}
-		return null;
 	}
 
 	/*

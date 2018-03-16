@@ -47,9 +47,9 @@ public class ParserTest {
 
 	// creates and returns a parser for the given input.
 	private Parser makeParser(String input) throws LexicalException {
-		//show(input); // Display the input
+		// show(input); // Display the input
 		Scanner scanner = new Scanner(input).scan(); // Create a Scanner and initialize it
-		//show(scanner); // Display the Scanner
+		// show(scanner); // Display the Scanner
 		Parser parser = new Parser(scanner);
 		return parser;
 	}
@@ -81,7 +81,7 @@ public class ParserTest {
 		String input = "b{}";
 		Parser parser = makeParser(input);
 		Program p = parser.parse();
-		//show(p);
+		// show(p);
 		assertEquals("b", p.progName);
 		assertEquals(0, p.block.decsOrStatements.size());
 	}
@@ -110,24 +110,23 @@ public class ParserTest {
 		String input = "b{int c; image j;}";
 		Parser parser = makeParser(input);
 		Program p = parser.parse();
-		//show(p);
+		// show(p);
 		checkDec(p.block, 0, Kind.KW_int, "c");
 		checkDec(p.block, 1, Kind.KW_image, "j");
 	}
-	
+
 	@Test
 	public void testDec1() throws LexicalException, SyntaxException {
 		String input = "b{int c; image j; float abc; filename usr; boolean b;}";
 		Parser parser = makeParser(input);
 		Program p = parser.parse();
-		//show(p);
+		// show(p);
 		checkDec(p.block, 0, Kind.KW_int, "c");
 		checkDec(p.block, 1, Kind.KW_image, "j");
 		checkDec(p.block, 2, Kind.KW_float, "abc");
 		checkDec(p.block, 3, Kind.KW_filename, "usr");
 		checkDec(p.block, 4, Kind.KW_boolean, "b");
 	}
-	
 
 	/**
 	 * This test illustrates how you can test specific grammar elements by
@@ -143,7 +142,7 @@ public class ParserTest {
 		String input = "x + 2";
 		Parser parser = makeParser(input);
 		Expression e = parser.expression(); // call expression here instead of parse
-		//show(e);
+		// show(e);
 		assertEquals(ExpressionBinary.class, e.getClass());
 		ExpressionBinary b = (ExpressionBinary) e;
 		assertEquals(ExpressionIdent.class, b.leftExpression.getClass());
@@ -154,27 +153,84 @@ public class ParserTest {
 		assertEquals(2, right.value);
 		assertEquals(OP_PLUS, b.op);
 	}
-	
+
 	@Test
 	public void testExpression1() throws LexicalException, SyntaxException {
 		String input = "20 | 30 & 40 ** 50";
 		Parser parser = makeParser(input);
 		Expression e = parser.expression(); // call expression here instead of parse
-		//show(e);
+		// show(e);
 		assertEquals(ExpressionBinary.class, e.getClass());
-		
+
 	}
-	
+
 	@Test
 	public void test01() throws LexicalException, SyntaxException {
 		String input = "abc{int ab;ab := (20 | 30 & 40 ** 50);}";
 		Parser parser = makeParser(input);
 		Program p = parser.program(); // call expression here instead of parse
-		//show(p);
+		// show(p);
 		assertEquals(Program.class, p.getClass());
 		assertEquals(Block.class, p.block.getClass());
 		Block blk = (Block) p.block;
 		assertEquals(Declaration.class, blk.decsOrStatements.get(0).getClass());
-		
+
 	}
+
+	@Test
+	public void testDemo3() throws LexicalException, SyntaxException {
+		String input = "x**+2";
+		Parser parser = makeParser(input);
+		Expression p = parser.expression();
+		show(p);
+		assertEquals(p.toString(),
+				"ExpressionBinary [leftExpression=ExpressionIdent [name=x], op=OP_POWER, rightExpression=ExpressionUnary [op=OP_PLUS, expression=ExpressionIntegerLiteral [value=2]]]");
+	}
+
+	@Test
+	public void test001() throws LexicalException, SyntaxException {
+		String input = "sin x";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			ExpressionFunctionAppWithExpressionArg f = (ExpressionFunctionAppWithExpressionArg) parser
+					.functionApplication();
+			show(f);
+		} catch (Exception e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test0011() throws LexicalException, SyntaxException {
+		String input = "sin(x)";
+		Parser parser = makeParser(input);
+		ExpressionFunctionAppWithExpressionArg f = (ExpressionFunctionAppWithExpressionArg) parser
+				.functionApplication();
+		show(f);
+	}
+
+	@Test
+	public void test0012() throws LexicalException, SyntaxException {
+		String input = "Za";
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		try {
+			ExpressionPredefinedName f = (ExpressionPredefinedName) parser.predefinedName();
+			show(f);
+		} catch (Exception e) {
+			show(e);
+			throw (e);
+		}
+	}
+
+	@Test
+	public void test0013() throws LexicalException, SyntaxException {
+		String input = "Z";
+		Parser parser = makeParser(input);
+		ExpressionPredefinedName f = (ExpressionPredefinedName) parser.predefinedName();
+		show(f);
+	}
+
 }

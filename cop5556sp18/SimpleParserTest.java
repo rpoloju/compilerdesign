@@ -359,5 +359,14 @@ public class SimpleParserTest {
 			throw (e);
 		}
 	}
+	
+	@Test
+	public void test22() throws LexicalException, SyntaxException {
+		String input = "sin x";
+		show(input);
+		Parser parser = makeParser(input);
+		thrown.expect(SyntaxException.class);
+		parser.parse();
+	}
 
 }
