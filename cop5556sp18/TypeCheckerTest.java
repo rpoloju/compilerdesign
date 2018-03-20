@@ -98,5 +98,23 @@ public class TypeCheckerTest {
 		}
 	}
 
+	@Test
+	public void sample3() throws Exception {
+		String input = "xyz{int a;a:=10;float a;}";
+		thrown.expect(SemanticException.class);
+		try {
+			typeCheck(input);
+		} catch (SemanticException e) {
+			show(e);
+			throw e;
+		}
+	}
+
+	@Test
+	public void scope1() throws Exception {
+		String input = "abc{int x;x:=10;int y;y:=20;while (y > x) {int a;a:=1;};while (x>y) {int a;a:=2;};}";
+		typeCheck(input);
+	}
+
 
 }

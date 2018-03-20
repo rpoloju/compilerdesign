@@ -48,6 +48,21 @@ public class SymbolTable {
 		}
 		return declaration;
 	}
+	
+	public Declaration getDeclarationinCurrentScope(String identifier) {
+		int x = 0;
+		Declaration declaration = null;
+		Map<Integer, Declaration> actualScopeMap = symTable.get(identifier);
+		
+		if (actualScopeMap != null) {
+			x = scopeStack.get(scopeStack.size() - 1);
+			
+			if (actualScopeMap.containsKey(x)) {
+				declaration = actualScopeMap.get(x);
+			}
+		}
+		return declaration;
+	}
 
 	public boolean addToMap(String identifier, Declaration declaration) {
 		int topOfStack = scopeStack.peek();

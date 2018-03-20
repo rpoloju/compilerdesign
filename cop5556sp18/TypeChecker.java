@@ -75,7 +75,7 @@ public class TypeChecker implements ASTVisitor {
 
 		// If the declaration is already present in the symbol table, throw Semantic
 		// Exception
-		if (symtable.getDeclaration(decName) != null) {
+		if (symtable.getDeclarationinCurrentScope(decName) != null) {
 			String message = decName.toString() + " is already in the current scope";
 			throw new SemanticException(null, message);
 		}
