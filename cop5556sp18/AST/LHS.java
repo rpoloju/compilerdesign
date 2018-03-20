@@ -1,5 +1,7 @@
 package cop5556sp18.AST;
 
+import cop5556sp18.Types;
+
 /**
  * This code is for the class project in COP5556 Programming Language Principles 
  * at the University of Florida, Spring 2018.
@@ -21,4 +23,5 @@ public abstract class LHS extends ASTNode {
 		super(firstToken);
 	}
 
+	public Types.Type type;
 }
