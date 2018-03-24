@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import cop5556sp18.Parser;
+import cop5556sp18.Parser.SyntaxException;
 import cop5556sp18.Scanner;
 import cop5556sp18.Scanner.LexicalException;
 import cop5556sp18.AST.ASTVisitor;
@@ -87,6 +88,24 @@ public class TypeCheckerTest {
 	}
 
 	@Test
+	public void sample11() throws Exception {
+		String input = "prog{image image1; write image1 to image1;}";
+		thrown.expect(SemanticException.class);
+		try {
+			typeCheck(input);
+		} catch (SemanticException e) {
+			show(e);
+			throw e;
+		}
+	}
+
+	@Test
+	public void sample111() throws Exception {
+		String input = "prog {int var1; float var2; image var3;var1 := width(var3); var1 := height(var3); var2 := float(1); var1 := int(1.0);}";
+		typeCheck(input);
+	}
+
+	@Test
 	public void sample2() throws Exception {
 		String input = "xyz{int a;a:=10;float b;b:=10.5;while (b > a) { boolean x; x:=true; b:=b-1.0;};}";
 		thrown.expect(SemanticException.class);
@@ -111,10 +130,9 @@ public class TypeCheckerTest {
 	}
 
 	@Test
-	public void scope1() throws Exception {
-		String input = "abc{int x;x:=10;int y;y:=20;while (y > x) {int a;a:=1;};while (x>y) {int a;a:=2;};}";
+	public void scope5() throws Exception {
+		String input = "abc{int x;x:=10;int y;int a;y:=20;while (y > x) {int a;a:=1;};while (x>y) {a:=2;};}";
 		typeCheck(input);
 	}
-
 
 }

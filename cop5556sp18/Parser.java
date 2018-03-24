@@ -115,13 +115,15 @@ public class Parser {
 			consume();
 		}
 
-		if (isKind(LSQUARE)) {
-			match(LSQUARE);
-			width = expression();
-			match(COMMA);
-			height = expression();
-			match(RSQUARE);
-		}
+		if (!(firstToken.kind.equals(KW_int)) || (firstToken.kind.equals(KW_float))
+				|| (firstToken.kind.equals(KW_boolean)) || (firstToken.kind.equals(KW_filename)))
+			if (isKind(LSQUARE)) {
+				match(LSQUARE);
+				width = expression();
+				match(COMMA);
+				height = expression();
+				match(RSQUARE);
+			}
 		d = new Declaration(firstToken, firstToken, ident, width, height);
 		return d;
 	}

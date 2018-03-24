@@ -127,8 +127,8 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(null, message);
 		}
 
-		if (!(writeSource.firstToken.kind.equals(Kind.KW_image))
-				&& (writeDest.firstToken.kind.equals(Kind.KW_filename))) {
+		if (!(writeSource.firstToken.kind.equals(Kind.KW_image)
+				&& (writeDest.firstToken.kind.equals(Kind.KW_filename)))) {
 			String message = "Type Mismatch in StatementWrite";
 			throw new SemanticException(null, message);
 		}
@@ -328,7 +328,7 @@ public class TypeChecker implements ASTVisitor {
 			return Type.INTEGER;
 
 		} else if (function.equals(Kind.KW_float) && type.equals(Type.INTEGER)) {
-			return Type.INTEGER;
+			return Type.FLOAT;
 
 		} else if (function.equals(Kind.KW_float) && type.equals(Type.FLOAT)) {
 			return Type.FLOAT;
@@ -539,6 +539,11 @@ public class TypeChecker implements ASTVisitor {
 		}
 
 		return statementSleep;
+	}
+	
+	public void ravi() {
+		int x = 10;
+		
 	}
 
 }
