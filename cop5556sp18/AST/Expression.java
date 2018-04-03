@@ -23,5 +23,10 @@ public abstract class Expression extends ASTNode {
 	}
 
 	public Types.Type type;
+	
+	public Types.Type getType() {
+		return type;
+	}
+
 
 }

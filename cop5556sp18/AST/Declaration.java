@@ -84,7 +84,15 @@ public class Declaration extends ASTNode {
 				+ width + ", height=" + height + "]";
 	}
 
+	private int currentSlot;
 
+	public int getSlot() {
+		return currentSlot;
+	}
+
+	public void setSlot(int slot) {
+		this.currentSlot = slot;
+	}
 	
 	
 

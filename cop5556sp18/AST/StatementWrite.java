@@ -19,7 +19,9 @@ public class StatementWrite extends Statement {
 
 	public final String sourceName;
 	public final String destName;
-
+	public Declaration sourceDec;
+	public Declaration declDec;
+	
 	public StatementWrite(Token firstToken, Token sourceName, Token destName) {
 		super(firstToken);
 		this.sourceName = sourceName.getText();

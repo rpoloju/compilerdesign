@@ -127,6 +127,8 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(null, message);
 		}
 
+		statementWrite.sourceDec = writeSource;
+		statementWrite.declDec = writeDest;
 		if (!(writeSource.firstToken.kind.equals(Kind.KW_image)
 				&& (writeDest.firstToken.kind.equals(Kind.KW_filename)))) {
 			String message = "Type Mismatch in StatementWrite";
@@ -141,6 +143,7 @@ public class TypeChecker implements ASTVisitor {
 		statementInput.e.visit(this, arg);
 
 		Declaration declaration = symtable.getDeclaration(statementInput.destName);
+		statementInput.dec = declaration;
 		if (declaration == null) {
 			String message = statementInput.destName.toString() + " is not declared in the current scope";
 			throw new SemanticException(null, message);
@@ -436,6 +439,7 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(pixelDeclaration.firstToken, message);
 		}
 		expressionPixel.type = Type.INTEGER;
+		expressionPixel.dec = pixelDeclaration;
 		return expressionPixel;
 	}
 
@@ -449,6 +453,7 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(expressionIdent.firstToken, message);
 		}
 		expressionIdent.type = Types.getType(identDeclaration.firstToken.kind);
+		expressionIdent.dec = identDeclaration;
 		return expressionIdent;
 	}
 
@@ -467,6 +472,7 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(declaration.firstToken, message);
 		}
 		lhsSample.type = Type.INTEGER;
+		lhsSample.dec = declaration;
 		return lhsSample;
 	}
 
@@ -486,6 +492,7 @@ public class TypeChecker implements ASTVisitor {
 		}
 
 		lhsPixel.type = Type.INTEGER;
+		lhsPixel.dec = declaration;
 		return lhsPixel;
 	}
 
@@ -498,6 +505,7 @@ public class TypeChecker implements ASTVisitor {
 			throw new SemanticException(null, message);
 		} else {
 			lhsIdent.type = Types.getType(declaration.type);
+			lhsIdent.dec = declaration;
 		}
 
 		return lhsIdent;

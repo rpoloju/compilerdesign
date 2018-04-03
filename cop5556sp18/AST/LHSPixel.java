@@ -19,6 +19,7 @@ public class LHSPixel extends LHS {
 
 	public final String name;
 	public final PixelSelector pixelSelector;
+	public Declaration dec;
 
 	public LHSPixel(Token firstToken, Token name, PixelSelector pixelSelector) {
 		super(firstToken);

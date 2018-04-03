@@ -21,6 +21,7 @@ public class LHSSample extends LHS {
 	public final String name;
 	public final PixelSelector pixelSelector;
 	public final Kind color;
+	public Declaration dec;
 
 	public LHSSample(Token firstToken, Token name, PixelSelector pixel,
 			Token color) {
