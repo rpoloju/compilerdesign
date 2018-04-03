@@ -13,7 +13,6 @@
 
 package cop5556sp18;
 
-
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -475,11 +474,9 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			}
 
 		} else if (lhsIdent.type == Type.IMAGE) {
-			mv.visitFieldInsn(GETSTATIC, className, fieldname, fieldType);
-			mv.visitVarInsn(ILOAD, 1);
-			mv.visitVarInsn(ILOAD, 2);
 			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "deepCopy", RuntimeImageSupport.deepCopySig,
 					false);
+			mv.visitVarInsn(ASTORE, lhsIdent.dec.getSlot());
 
 		} else {
 			throw new UnsupportedOperationException();
@@ -610,22 +607,18 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		}
 			break;
 		case KW_image: {
-			mv.visitVarInsn(ILOAD, 3);
-			mv.visitInsn(ICONST_0);
-			mv.visitJumpInsn(IF_ICMPEQ, startLabel);
-			mv.visitVarInsn(ILOAD, 3);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-			mv.visitVarInsn(ILOAD, 4);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+			if (statementInput.dec.width != null && statementInput.dec.height != null) {
+				statementInput.dec.width.visit(this, arg);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+				statementInput.dec.height.visit(this, arg);
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+
+			} else {
+				mv.visitInsn(ACONST_NULL);
+				mv.visitInsn(ACONST_NULL);
+			}
 			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "readImage",
 					RuntimeImageSupport.readImageSig, false);
-			mv.visitJumpInsn(GOTO, endLabel);
-			mv.visitLabel(startLabel);
-			mv.visitInsn(ACONST_NULL);
-			mv.visitInsn(ACONST_NULL);
-			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "readImage",
-					RuntimeImageSupport.readImageSig, false);
-			mv.visitLabel(endLabel);
 		}
 			break;
 		default:
@@ -691,29 +684,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitStatementSleep(StatementSleep statementSleep, Object arg) throws Exception {
 		statementSleep.duration.visit(this, arg);
-
-		/*
-		 * Label tryStart = new Label(); Label tryEnd = new Label(); Label tryHandle =
-		 * new Label(); mv.visitTryCatchBlock(tryStart, tryEnd, tryHandle,
-		 * "java/lang/InterruptedException"); mv.visitLabel(tryStart);
-		 */
-
 		mv.visitInsn(I2L);
 		mv.visitMethodInsn(INVOKESTATIC, "java/lang/Thread", "sleep", "(J)V", false);
-		/*
-		 * mv.visitLabel(tryEnd);
-		 * 
-		 * Label catchEnd = new Label(); mv.visitJumpInsn(GOTO, catchEnd);
-		 * mv.visitLabel(tryHandle);
-		 * 
-		 * mv.visitVarInsn(ASTORE, slotNumber); Label CatchStart = new Label();
-		 * mv.visitLabel(CatchStart);
-		 * 
-		 * mv.visitVarInsn(ALOAD, slotNumber); slotNumber++;
-		 * mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/InterruptedException",
-		 * "printStackTrace", "()V", false); mv.visitLabel(catchEnd);
-		 */
-
 		return null;
 	}
 

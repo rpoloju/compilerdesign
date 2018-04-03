@@ -284,7 +284,7 @@ public class CodeGenTest {
 		String prog = "testfilename2";
 		String input = prog + "{image a;input a from @ 0;show(a); sleep(5000);} ";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.jpg"}; // create command line argument array to initialize params, none in this case
+		String[] commandLineArgs = {"/cise/homes/rpoloju/Back.JPG"}; // create command line argument array to initialize params, none in this case
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
@@ -296,6 +296,39 @@ public class CodeGenTest {
 		String input = prog + "{int a;input a from @ 1;show a;} ";
 		byte[] bytecode = genCode(input);
 		String[] commandLineArgs = {"3","4"}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test11() throws Exception {
+		String prog = "testImage";
+		String input = prog + "{image a;input a from @ 0;image b;b:=a;show(b);sleep(4000);} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {"/cise/homes/rpoloju/Back.JPG"}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test12() throws Exception {
+		String prog = "testscope";
+		String input = prog + "{int a;int b;a:=10;b:=20;int c;c := a+b;int d;d:= a-b;show(c);show(d);} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {""}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test13() throws Exception {
+		String prog = "testor";
+		String input = prog + "{show true|false;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; // create command line argument array to initialize params, none in this case
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
