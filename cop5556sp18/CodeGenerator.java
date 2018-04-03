@@ -13,8 +13,6 @@
 
 package cop5556sp18;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
@@ -28,6 +26,7 @@ import cop5556sp18.AST.ASTNode;
 import cop5556sp18.AST.ASTVisitor;
 import cop5556sp18.AST.Block;
 import cop5556sp18.AST.Declaration;
+import cop5556sp18.AST.Expression;
 import cop5556sp18.AST.ExpressionBinary;
 import cop5556sp18.AST.ExpressionBooleanLiteral;
 import cop5556sp18.AST.ExpressionConditional;
@@ -157,13 +156,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 				fieldType = "Z";
 
 			} else {
-				fieldType = "Ljava/lang/String";
+				fieldType = "Ljava/lang/String;";
 			}
 
 			mv.visitLocalVariable(fieldName, fieldType, null, start, end, declaration.getSlot());
-			// FieldVisitor fv = cw.visitField(ACC_STATIC, fieldName, fieldType, null,
-			// null);
-			// fv.visitEnd();
 
 		} else {
 			if (declaration.width != null && declaration.height != null) {
@@ -586,7 +582,55 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitStatementInput(StatementInput statementInput, Object arg) throws Exception {
-
+		Label startLabel = new Label();
+		Label endLabel = new Label();
+		statementInput.e.visit(this, arg);
+		Kind kind = statementInput.dec.type;
+		mv.visitVarInsn(ALOAD, 0);
+		statementInput.e.visit(this, arg);
+		mv.visitInsn(AALOAD);
+		switch (kind) {
+		case KW_int: {
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I", false);
+			mv.visitVarInsn(ISTORE, statementInput.dec.getSlot());
+		}
+			break;
+		case KW_float: {
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "parseFloat", "(Ljava/lang/String;)F", false);
+			mv.visitVarInsn(FSTORE, statementInput.dec.getSlot());
+		}
+			break;
+		case KW_boolean: {
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "parseBoolean", "(Ljava/lang/String;)I", false);
+			mv.visitVarInsn(ISTORE, statementInput.dec.getSlot());
+		}
+			break;
+		case KW_filename: {
+			mv.visitVarInsn(ASTORE, statementInput.dec.getSlot());
+		}
+			break;
+		case KW_image: {
+			mv.visitVarInsn(ILOAD, 3);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(IF_ICMPEQ, startLabel);
+			mv.visitVarInsn(ILOAD, 3);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+			mv.visitVarInsn(ILOAD, 4);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "readImage",
+					RuntimeImageSupport.readImageSig, false);
+			mv.visitJumpInsn(GOTO, endLabel);
+			mv.visitLabel(startLabel);
+			mv.visitInsn(ACONST_NULL);
+			mv.visitInsn(ACONST_NULL);
+			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "readImage",
+					RuntimeImageSupport.readImageSig, false);
+			mv.visitLabel(endLabel);
+		}
+			break;
+		default:
+			break;
+		}
 		return null;
 	}
 
@@ -634,12 +678,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			break;
 		case IMAGE: {
 			CodeGenUtils.genLogTOS(GRADE, mv, type);
-			// mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out",
-			// "Ljava/io/PrintStream;");
-			// mv.visitInsn(Opcodes.SWAP);
-			mv.visitMethodInsn(INVOKEVIRTUAL, RuntimeImageSupport.className, "makeFrame",
+			mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "makeFrame",
 					RuntimeImageSupport.makeFrameSig, false);
 		}
+			break;
 		default:
 			throw new UnsupportedOperationException();
 		}

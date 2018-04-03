@@ -255,4 +255,49 @@ public class CodeGenTest {
 		show("Log:\n" + RuntimeLog.globalLog);
 		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
 	}
+	
+	@Test
+	public void test07() throws Exception {
+		String prog = "testImage1";
+		String input = prog + "{image a[200,300];show a;/*sleep(5000);*/} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		System.out.println("stopped for convenience");
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test08() throws Exception {
+		String prog = "testFile";
+		String input = prog + "{filename f;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test09() throws Exception {
+		String prog = "testfilename2";
+		String input = prog + "{image a;input a from @ 0;show(a); sleep(5000);} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {"E:\\Back.jpg"}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test10() throws Exception {
+		String prog = "testLocation";
+		String input = prog + "{int a;input a from @ 1;show a;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {"3","4"}; // create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		//assertEquals("entering main;3;leaving main;", RuntimeLog.globalLog.toString());
+	}
 }
