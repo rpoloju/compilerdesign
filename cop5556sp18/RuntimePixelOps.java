@@ -40,7 +40,7 @@ public class RuntimePixelOps {
 			ZERO = { ZERO_ALPHA, ZERO_RED, ZERO_GRN, ZERO_BLU, },
 			BITOFFSETS = { SHIFT_ALPHA, SHIFT_RED, SHIFT_GRN, SHIFT_BLU, };
 
-	public static final String JVMClassName = "cop5555/runtime/Pixel";
+	public static final String JVMClassName = "cop5556sp18/RuntimePixelOps";
 
 	public static final int ALPHA = 0;
 	public static final int RED = 1;
