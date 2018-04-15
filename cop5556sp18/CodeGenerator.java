@@ -974,8 +974,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitStatementWrite(StatementWrite statementWrite, Object arg) throws Exception {
-		mv.visitLdcInsn(statementWrite.sourceName);
-		mv.visitLdcInsn(statementWrite.destName);
+		mv.visitVarInsn(ALOAD, statementWrite.sourceDec.getSlot());
+		mv.visitVarInsn(ALOAD, statementWrite.declDec.getSlot());
 		mv.visitMethodInsn(INVOKESTATIC, RuntimeImageSupport.className, "write", RuntimeImageSupport.writeSig, false);
 
 		return null;

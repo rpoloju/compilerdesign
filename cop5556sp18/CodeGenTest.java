@@ -291,8 +291,8 @@ public class CodeGenTest {
 		String prog = "testfilename2";
 		String input = prog + "{image a;input a from @ 0;show(a);} ";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = { "E:\\Back.JPG" };
-		// String[] commandLineArgs = {"/cise/homes/rpoloju/Back.JPG"};
+		// String[] commandLineArgs = { "E:\\Back.JPG" };
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
@@ -315,8 +315,8 @@ public class CodeGenTest {
 		String prog = "testImage";
 		String input = prog + "{image a;input a from @ 0;image b;b:=a;show(b);} ";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = { "E:\\Back.JPG" };
-		// String[] commandLineArgs = {"/cise/homes/rpoloju/Back.JPG"};
+		// String[] commandLineArgs = { "E:\\Back.JPG" };
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
@@ -328,7 +328,7 @@ public class CodeGenTest {
 		String prog = "testscope";
 		String input = prog + "{int a;int b;a:=10;b:=20;int c;c := a+b;int d;d:= a-b;show(c);show(d);} ";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = { "" }; // create command line argument array to initialize params, none in this case
+		String[] commandLineArgs = {}; // create command line argument array to initialize params, none in this case
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
@@ -410,7 +410,8 @@ public class CodeGenTest {
 	@Test
 	public void test19() throws Exception {
 		String prog = "testDimensions";
-		String input = prog + "{image b[512,256]; show width(b); show height(b);\nimage c; show width(c); show height(c);}";
+		String input = prog
+				+ "{image b[512,256]; show width(b); show height(b);\nimage c; show width(c); show height(c);}";
 		byte[] bytecode = genCode(input);
 		String[] commandLineArgs = {}; // create command line argument array to initialize params, none in this case
 		runCode(prog, bytecode, commandLineArgs);
@@ -422,9 +423,11 @@ public class CodeGenTest {
 	@Test
 	public void test20() throws Exception {
 		String prog = "testImageCopy";
-		String input = prog + "{image y[1000,1000]; image copy[1000,1000]; input y from @ 0 ; show y; copy := y; show copy;}";
+		String input = prog
+				+ "{image y[1000,1000]; image copy[1000,1000]; input y from @ 0 ; show y; copy := y; show copy;}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = { "E:\\Back.JPG" };
+		// String[] commandLineArgs = { "E:\\Back.JPG" };
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
@@ -455,103 +458,107 @@ public class CodeGenTest {
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test23() throws Exception {
 		String prog = "testPolar";
 		String input = prog + "{show(cart_x[polar_r[4,2],polar_a[4,2]]);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = { "2", "3.14", "false", "true" };
+		String[] commandLineArgs = {};
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test24() throws Exception {
 		String prog = "testlhspixel";
 		String input = prog + "{image x;input x from @ 0;show(x);show(x[2,4]);x[2,4] := 5;show(x[2,4]);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
-	//@Test
+
+	@Test
 	public void test25() throws Exception {
 		String prog = "testWrite";
-		String input = prog + "{image x;input x from @ 0;show(x);filename y;sleep(4000);write x to y;}";
+		String input = prog + "{image x;input x from @ 0;show(x);filename y;input y from @ 1;write x to y;}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG", "E:\\Back1.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG", "E:\\Back0001.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG", "/cise/homes/rpoloju/Backwrite.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test26() throws Exception {
 		String prog = "testPixelSelector";
 		String input = prog + "{image x;input x from @ 0;show(x[3,4]);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test27() throws Exception {
 		String prog = "testColors";
 		String input = prog + "{image x;input x from @ 0;show(red(x[3,4]));}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test28() throws Exception {
 		String prog = "testIfInt";
 		String input = prog + "{int x; x:=3; if (x == 0) {show(10);};show(20);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = {};
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test31() throws Exception {
 		String prog = "testIffloat";
 		String input = prog + "{float x; x:=3.5; if (x <= 3.4) {show(10);};show(20);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = {};
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test35() throws Exception {
 		String prog = "testIfboolean";
 		String input = prog + "{boolean x; x:=true; if (x < false) {show(10);};show(20);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = {};
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test29() throws Exception {
 		String prog = "testexpcond";
@@ -563,73 +570,83 @@ public class CodeGenTest {
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test30() throws Exception {
 		String prog = "textPixelConst";
 		String input = prog + "{image im[256,256];int x;int y;x:=10;y:=20;im[x,y]:=<<255,255,0,0>>;show(im[x,y]);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = {};
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test32() throws Exception {
 		String prog = "test1";
-		String input = prog + "{image im[256,256];int x;int y;x:=0;y:=0;while(x<width(im)) {y:=0;while(y<height(im)) {im[x,y]:=<<255,255,0,0>>;y:=y+1;};x:=x+1;};show im;sleep(4000);}";
+		String input = prog
+				+ "{image im[256,256];int x;int y;x:=0;y:=0;while(x<width(im)) {y:=0;while(y<height(im)) {im[x,y]:=<<255,255,0,0>>;y:=y+1;};x:=x+1;};show im;sleep(4000);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test33() throws Exception {
 		String prog = "test2";
-		String input = prog + "{image h;input h from @0;show h; sleep(4000); image g[width(h),height(h)];int x;x:=0;\r\nwhile(x<width(g)){int y;y:=0;while(y<height(g)){g[x,y]:=h[y,x];y:=y+1;};x:=x+1;};show g;sleep(4000);}";
+		String input = prog
+				+ "{image h;input h from @0;show h; sleep(4000); image g[width(h),height(h)];int x;x:=0;\r\nwhile(x<width(g)){int y;y:=0;while(y<height(g)){g[x,y]:=h[y,x];y:=y+1;};x:=x+1;};show g;sleep(4000);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test34() throws Exception {
 		String prog = "test2";
-		String input = prog + "{image h;input h from @0;show h; sleep(4000); image g[width(h),height(h)];int x;x:=0;\r\nwhile(x<width(g)){int y;y:=0;while(y<height(g)){g[x,y]:=h[y,x];y:=y+1;};x:=x+1;};show g;sleep(4000);}";
+		String input = prog
+				+ "{image h;input h from @0;show h; sleep(4000); image g[width(h),height(h)];int x;x:=0;\r\nwhile(x<width(g)){int y;y:=0;while(y<height(g)){g[x,y]:=h[y,x];y:=y+1;};x:=x+1;};show g;sleep(4000);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test36() throws Exception {
 		String prog = "test2";
-		String input = prog + "{image im[1024,1024];int x;x:=0;while(x<width(im)) {int y;y:=0;while(y<height(im)) {float p;p:=polar_r[x,y];int r;r:=int(p)%Z;im[x,y]:=<<Z,0,0,r>>;y:=y+1;};x:=x+1;};show im;sleep(4000);}";
+		String input = prog
+				+ "{image im[1024,1024];int x;x:=0;while(x<width(im)) {int y;y:=0;while(y<height(im)) {float p;p:=polar_r[x,y];int r;r:=int(p)%Z;im[x,y]:=<<Z,0,0,r>>;y:=y+1;};x:=x+1;};show im;sleep(4000);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
-	
+
 	@Test
 	public void test37() throws Exception {
 		String prog = "test2";
-		String input = prog + "{image bird; input bird from @0;show bird;sleep(4000);image bird2[width(bird),height(bird)];int x;x:=0;while(x<width(bird2)) {int y;y:=0;while(y<height(bird2)) {blue(bird2[x,y]):=red(bird[x,y]);green(bird2[x,y]):=blue(bird[x,y]);red(bird2[x,y]):=green(bird[x,y]);alpha(bird2[x,y]):=Z;y:=y+1;};x:=x+1;};show bird2;sleep(4000);}";
+		String input = prog
+				+ "{image bird; input bird from @0;show bird;sleep(4000);image bird2[width(bird),height(bird)];int x;x:=0;while(x<width(bird2)) {int y;y:=0;while(y<height(bird2)) {blue(bird2[x,y]):=red(bird[x,y]);green(bird2[x,y]):=blue(bird[x,y]);red(bird2[x,y]):=green(bird[x,y]);alpha(bird2[x,y]):=Z;y:=y+1;};x:=x+1;};show bird2;sleep(4000);}";
 		byte[] bytecode = genCode(input);
-		String[] commandLineArgs = {"E:\\Back.JPG"};
+		// String[] commandLineArgs = {"E:\\Back.JPG"};
+		String[] commandLineArgs = { "/cise/homes/rpoloju/Back.JPG" };
 		runCode(prog, bytecode, commandLineArgs);
 		show("Log:\n" + RuntimeLog.globalLog);
 		// assertEquals("entering main;3;leaving main;",
