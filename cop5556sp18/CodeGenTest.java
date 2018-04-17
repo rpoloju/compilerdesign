@@ -652,5 +652,29 @@ public class CodeGenTest {
 		// assertEquals("entering main;3;leaving main;",
 		// RuntimeLog.globalLog.toString());
 	}
+	
+	@Test
+	public void test38() throws Exception {
+		String prog = "test2";
+		String input = prog+ "{float x;x:=9.1;float y;y:=4.1;show(x-y);}";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {};
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		// assertEquals("entering main;3;leaving main;",
+		// RuntimeLog.globalLog.toString());
+	}
+	
+	@Test
+	public void test39() throws Exception {
+		String prog = "testPixelPolar";
+		String input = prog+ "{image x; input x from @ 0; x[0.5,1.0] := 0;show(x);sleep(4000);}";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {"E:\\Back.JPG"};
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n" + RuntimeLog.globalLog);
+		// assertEquals("entering main;3;leaving main;",
+		// RuntimeLog.globalLog.toString());
+	}
 
 }

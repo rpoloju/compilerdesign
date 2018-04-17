@@ -513,33 +513,7 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionFunctionAppWithPixel(ExpressionFunctionAppWithPixel expressionFunctionAppWithPixel,
 			Object arg) throws Exception {
-		/*
-		 * if (expressionFunctionAppWithPixel.name == Kind.KW_cart_x ||
-		 * expressionFunctionAppWithPixel.name == Kind.KW_cart_y) { float r =
-		 * ((ExpressionFloatLiteral) expressionFunctionAppWithPixel.e0).value; float
-		 * theta = ((ExpressionFloatLiteral) expressionFunctionAppWithPixel.e1).value;
-		 * 
-		 * if (expressionFunctionAppWithPixel.name == Kind.KW_cart_x) { int cartx =
-		 * (int) (r * Math.cos(theta)); mv.visitLdcInsn(cartx);
-		 * 
-		 * } else { int carty = (int) (r * Math.sin(theta)); mv.visitLdcInsn(carty);
-		 * 
-		 * }
-		 * 
-		 * } else if (expressionFunctionAppWithPixel.name == Kind.KW_polar_a ||
-		 * expressionFunctionAppWithPixel.name == Kind.KW_polar_r) { int x =
-		 * ((ExpressionIntegerLiteral) expressionFunctionAppWithPixel.e0).value; int y =
-		 * ((ExpressionIntegerLiteral) expressionFunctionAppWithPixel.e1).value;
-		 * 
-		 * if (expressionFunctionAppWithPixel.name == Kind.KW_polar_a) { float polara =
-		 * (float) Math.atan2(y, x); mv.visitLdcInsn(polara);
-		 * 
-		 * } else { float polarr = (float) Math.hypot(x, y); mv.visitLdcInsn(polarr);
-		 * 
-		 * }
-		 * 
-		 * } else { throw new UnsupportedOperationException(); }
-		 */
+		
 		if (expressionFunctionAppWithPixel.name == Kind.KW_cart_x
 				|| expressionFunctionAppWithPixel.name == Kind.KW_cart_y) {
 			expressionFunctionAppWithPixel.e1.visit(this, arg);
@@ -739,21 +713,28 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitPixelSelector(PixelSelector pixelSelector, Object arg) throws Exception {
-		/*
-		 * int xvalue = 0, yvalue = 0; if (pixelSelector.ex.type == Type.INTEGER) { if
-		 * (pixelSelector.ex.getClass().equals(ExpressionIdent.class)) {
-		 * ((ExpressionIdent) pixelSelector.ex).dec.visit(this, arg); } xvalue =
-		 * ((ExpressionIntegerLiteral) pixelSelector.ex).value; yvalue =
-		 * ((ExpressionIntegerLiteral) pixelSelector.ey).value;
-		 * 
-		 * } else if (pixelSelector.ex.type == Type.FLOAT) { xvalue = (int)
-		 * ((ExpressionFloatLiteral) pixelSelector.ex).value; yvalue = (int)
-		 * ((ExpressionFloatLiteral) pixelSelector.ey).value; }
-		 * 
-		 * mv.visitLdcInsn(xvalue); mv.visitLdcInsn(yvalue);
-		 */
-		pixelSelector.ex.visit(this, arg);
-		pixelSelector.ey.visit(this, arg);
+		if (pixelSelector.ex.type == Type.INTEGER) {
+			pixelSelector.ex.visit(this, arg);
+			pixelSelector.ey.visit(this, arg);
+
+		} else {
+			pixelSelector.ey.visit(this, arg);
+			mv.visitInsn(F2D);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "cos", "(D)D", false);
+			pixelSelector.ex.visit(this, arg);
+			mv.visitInsn(F2D);
+			mv.visitInsn(DMUL);
+			mv.visitInsn(D2I);
+
+			pixelSelector.ey.visit(this, arg);
+			mv.visitInsn(F2D);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "sin", "(D)D", false);
+			pixelSelector.ex.visit(this, arg);
+			mv.visitInsn(F2D);
+			mv.visitInsn(DMUL);
+			mv.visitInsn(D2I);
+
+		}
 		return null;
 	}
 
