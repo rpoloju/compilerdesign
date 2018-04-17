@@ -163,20 +163,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		} else {
 			if (declaration.width != null && declaration.height != null) {
 				declaration.width.visit(this, arg);
-				// mv.visitInsn(DUP);
-				// mv.visitVarInsn(ISTORE, 3);
-
 				declaration.height.visit(this, arg);
-				// mv.visitInsn(DUP);
-				// mv.visitVarInsn(ISTORE, 4);
 
 			} else if (declaration.width == null || declaration.height == null) {
-				// mv.visitInsn(ICONST_0);
-				// mv.visitVarInsn(ISTORE, 3);
 				mv.visitLdcInsn(defaultWidth);
-
-				// mv.visitInsn(ICONST_0);
-				// mv.visitVarInsn(ISTORE, 4);
 				mv.visitLdcInsn(defaultHeight);
 
 			} else {
@@ -411,12 +401,9 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 		Label endLabel = new Label();
 
 		conditionexp.visit(this, arg);
-
 		mv.visitLdcInsn(true);
-
 		mv.visitJumpInsn(IF_ICMPEQ, startLabel);
 		falseexp.visit(this, arg);
-
 		mv.visitJumpInsn(GOTO, endLabel);
 		mv.visitLabel(startLabel);
 		trueexp.visit(this, arg);
@@ -513,7 +500,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionFunctionAppWithPixel(ExpressionFunctionAppWithPixel expressionFunctionAppWithPixel,
 			Object arg) throws Exception {
-		
+
+		// No need to use Math.round as it is not mentioned in the specification. For
+		// our unit test cases, rounding should not be an issue
+
 		if (expressionFunctionAppWithPixel.name == Kind.KW_cart_x
 				|| expressionFunctionAppWithPixel.name == Kind.KW_cart_y) {
 			expressionFunctionAppWithPixel.e1.visit(this, arg);
@@ -561,7 +551,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionIdent(ExpressionIdent expressionIdent, Object arg) throws Exception {
 
-		String name = expressionIdent.name;
 		Type type = expressionIdent.type;
 		if (type == Type.INTEGER || type == Type.BOOLEAN) {
 			mv.visitVarInsn(ILOAD, expressionIdent.dec.getSlot());
@@ -621,7 +610,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionUnary(ExpressionUnary expressionUnary, Object arg) throws Exception {
 		Kind kind = expressionUnary.op;
-
 		expressionUnary.expression.visit(this, arg);
 
 		Label startLabel = new Label();
@@ -659,10 +647,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitLHSIdent(LHSIdent lhsIdent, Object arg) throws Exception {
-		// lhsIdent.visit(this, arg);
-
-		String fieldname = lhsIdent.name;
-		String fieldType = getFieldType(lhsIdent.type);
 
 		if (lhsIdent.type == Type.INTEGER || lhsIdent.type == Type.BOOLEAN || lhsIdent.type == Type.FLOAT
 				|| lhsIdent.type == Type.FILE) {
@@ -718,6 +702,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			pixelSelector.ey.visit(this, arg);
 
 		} else {
+			// If the pixel values are float, they are polar coordinates. You can coerce
+			// them to int using the cart_x and cart_y functions
 			pixelSelector.ey.visit(this, arg);
 			mv.visitInsn(F2D);
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", "cos", "(D)D", false);
@@ -827,7 +813,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitStatementInput(StatementInput statementInput, Object arg) throws Exception {
-		// statementInput.e.visit(this, arg);
 		Kind kind = statementInput.dec.type;
 		mv.visitVarInsn(ALOAD, 0);
 		statementInput.e.visit(this, arg);
@@ -938,18 +923,21 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitStatementWhile(StatementWhile statementWhile, Object arg) throws Exception {
-		Label whileGuard = new Label();
+		Label whileCondition = new Label();
 		Label whileBody = new Label();
-		mv.visitJumpInsn(GOTO, whileGuard); // GOTO GUARD
-		mv.visitLabel(whileBody);
-		statementWhile.b.visit(this, arg); // BODY
 		Label endWhileBody = new Label();
+		Label endWhileCondition = new Label();
+
+		// check condition
+		mv.visitJumpInsn(GOTO, whileCondition);
+		mv.visitLabel(whileBody);
+		statementWhile.b.visit(this, arg);
 		mv.visitLabel(endWhileBody);
-		mv.visitLabel(whileGuard);
-		statementWhile.guard.visit(this, arg); // GUARD
-		Label endWhileGuard = new Label();
-		mv.visitLabel(endWhileGuard);
-		mv.visitJumpInsn(IFNE, whileBody); // IFNE BODY
+		mv.visitLabel(whileCondition);
+		statementWhile.guard.visit(this, arg);
+		mv.visitLabel(endWhileCondition);
+		mv.visitJumpInsn(IFNE, whileBody);
+
 		return null;
 	}
 
